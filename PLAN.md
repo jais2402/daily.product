@@ -46,11 +46,13 @@ Final whole-branch review passed 2026-07-04 (fixes applied in 53e28bc). Branch m
 
 ## Phase 3 — Public feed (core product)
 
-- [ ] Feed query builders (New Trends now; others post-auth)
-- [ ] Article card + grid (responsive, placeholder images)
-- [ ] Topic filtering (chips)
-- [ ] Article detail view + Read More CTA
-- [ ] Deployed — at this point the product is publicly usable read-only
+Plan: docs/superpowers/plans/2026-07-04-phase-3-public-feed.md
+
+- [~] Feed query builders (New Trends now; others post-auth)
+- [~] Article card + grid (responsive, placeholder images)
+- [~] Topic filtering (chips)
+- [~] Article detail view + Read More CTA
+- [ ] Deployed — at this point the product is publicly usable read-only (blocked: Vercel project)
 
 ## Phase 4 — Auth + onboarding (deferred signup)
 

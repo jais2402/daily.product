@@ -2,6 +2,25 @@
 
 Architecture decisions and session log. Newest entries first.
 
+## 2026-07-04 — Data live + Phase 3 public feed built
+
+Migrations applied (user via MCP), 30 sources seeded, first live ingest ran:
+467 articles from 26 working feeds (First Round URL fixed; Mind the Product +
+a16z paused — RSS discontinued upstream; Cafe Hayek/Of Dollars And Data fail
+only from this machine, left active for Vercel). All 467 bulk-approved and
+auto-tagged by source category per Jayasuriya's instruction
+(scripts/bulk-approve.ts). Admin password set per user request.
+
+Phase 3 built and reviewed the same day: feed query lib (live-DB verified;
+caught PostgREST dual-embed silent filter drop, fixed via aliased embeds) and
+the public feed UI (topic chips, responsive cards, pagination, article detail
+with UUID pre-validation). Review caught doubled headers on admin pages —
+fixed with a (public) route group. Also fixed turbopack root __dirname bug
+that 404'd every route in dev (bundled config dir != project root; now cwd).
+
+Remaining for launch: Vercel project + env vars + cron (user), live smoke,
+merge PR #1. Signup/auth remains Phase 4.
+
 ## 2026-07-04 — Phases 1–2 code complete; final review passed; blocked on ops inputs
 
 Subagent-driven execution completed all Phase 1 code tasks (scaffold, Supabase
