@@ -3,6 +3,8 @@ const TRACKING_PARAMS = new Set([
   'ref','fbclid','gclid','mc_cid','mc_eid','igshid','source',
 ]);
 
+const ordinal = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
 export function canonicalizeUrl(raw: string): string | null {
   let url: URL;
   try {
@@ -14,6 +16,8 @@ export function canonicalizeUrl(raw: string): string | null {
 
   url.hash = '';
   url.hostname = url.hostname.toLowerCase();
+  url.username = '';
+  url.password = '';
   if (
     (url.protocol === 'https:' && url.port === '443') ||
     (url.protocol === 'http:' && url.port === '80')
@@ -23,7 +27,7 @@ export function canonicalizeUrl(raw: string): string | null {
 
   const kept = [...url.searchParams.entries()]
     .filter(([k]) => !TRACKING_PARAMS.has(k.toLowerCase()))
-    .sort(([a], [b]) => a.localeCompare(b));
+    .sort(([ak, av], [bk, bv]) => ordinal(ak, bk) || ordinal(av, bv));
   url.search = '';
   for (const [k, v] of kept) url.searchParams.append(k, v);
 

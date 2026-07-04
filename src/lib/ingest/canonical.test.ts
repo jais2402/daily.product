@@ -32,4 +32,19 @@ describe('canonicalizeUrl', () => {
     expect(canonicalizeUrl('ftp://a.com/x')).toBeNull();
     expect(canonicalizeUrl('javascript:alert(1)')).toBeNull();
   });
+  it('orders repeated params by value for stability', () => {
+    expect(canonicalizeUrl('https://a.com/p?tag=b&tag=a')).toBe(
+      canonicalizeUrl('https://a.com/p?tag=a&tag=b'),
+    );
+  });
+  it('uses ordinal comparison for locale-independent sorting', () => {
+    expect(canonicalizeUrl('https://a.com/p?b=2&a=1')).toBe(
+      canonicalizeUrl('https://a.com/p?a=1&b=2'),
+    );
+  });
+  it('strips userinfo credentials', () => {
+    expect(canonicalizeUrl('https://user:pass@example.com/x')).toBe(
+      'https://example.com/x',
+    );
+  });
 });
