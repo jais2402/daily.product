@@ -310,7 +310,10 @@ insert into topics (name, slug) values
   ('Product Strategy','product-strategy'),
   ('User Research','user-research'),
   ('Analytics & Data','analytics-data'),
-  ('AI & Tech Trends','ai-tech-trends'),
+  ('AI','ai'),
+  ('Technology','technology'),
+  ('Economics','economics'),
+  ('Finance','finance'),
   ('Leadership','leadership'),
   ('Startups & Founding','startups-founding'),
   ('Career','career');
@@ -833,11 +836,11 @@ export const ROLES: { value: MemberRole; label: string }[] = [
 const DEFAULTS: Record<MemberRole, string[]> = {
   pm: ['product-management', 'product-strategy', 'analytics-data'],
   apm: ['product-management', 'career', 'user-research'],
-  designer: ['product-design', 'user-research', 'ai-tech-trends'],
+  designer: ['product-design', 'user-research', 'technology'],
   marketer: ['growth', 'product-strategy', 'analytics-data'],
   founder: ['startups-founding', 'product-strategy', 'growth'],
-  developer: ['ai-tech-trends', 'product-management', 'startups-founding'],
-  other: ['product-management', 'ai-tech-trends'],
+  developer: ['technology', 'ai', 'startups-founding'],
+  other: ['product-management', 'technology'],
 };
 
 export function defaultTopicSlugsForRole(role: MemberRole): string[] {
