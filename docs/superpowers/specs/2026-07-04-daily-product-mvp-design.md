@@ -75,8 +75,8 @@ All tables in Supabase Postgres with RLS enabled.
 - `bookmarks` — (`user_id`, `article_id`, `created_at`), PK on the pair.
 - `upvotes` — (`user_id`, `article_id`, `created_at`), PK on the pair; trigger
   maintains `articles.upvote_count`.
-- `reads` — (`user_id`, `article_id`, `read_date`); logged when a user opens
-  an article detail / clicks through. Powers Most Read, streaks, activity grid.
+- `reads` — (`user_id`, `article_id`, `read_date`); logged when a user clicks
+  the "Read More" CTA on an article. Powers Most Read, streaks, activity grid.
 - `squads` — `name`, `slug`, `invite_code` (unguessable), `created_by`.
 - `squad_members` — (`squad_id`, `user_id`, `role` owner/member, `joined_at`).
 - `squad_shares` — article shared into a squad by a member, with optional note.
