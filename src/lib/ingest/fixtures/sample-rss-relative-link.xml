@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>PM Blog</title>
+    <link>https://pmblog.com</link>
+    <item>
+      <title>Relative link post</title>
+      <link>/posts/relative-link</link>
+      <description>A post linked relatively from the channel.</description>
+      <pubDate>Wed, 01 Jul 2026 10:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
