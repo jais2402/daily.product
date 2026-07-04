@@ -411,7 +411,7 @@ export async function runIngest(deps: IngestDeps): Promise<IngestSummary> {
   for (const source of sources) {
     try {
       const xml = await deps.fetchText(source.feed_url);
-      const items = await parseFeed(xml);
+      const items = await parseFeed(xml, source.feed_url); // baseUrl resolves relative links
       summary.fetched += 1;
 
       const urls = items.map((i) => i.url);
