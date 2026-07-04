@@ -2,6 +2,28 @@
 
 Architecture decisions and session log. Newest entries first.
 
+## 2026-07-04 — Phases 1–2 code complete; final review passed; blocked on ops inputs
+
+Subagent-driven execution completed all Phase 1 code tasks (scaffold, Supabase
+clients) and all Phase 2 code tasks (canonicalization, feed parsing, ingest
+orchestrator, /api/ingest, admin gate, approval queue + sources UI, seed
+script). Every component passed built→tested→reviewed→fixed gates; review
+rounds caught and fixed real bugs: unstable dedupe keys, HTML-entity excerpt
+corruption, relative-link data loss, garbage-link resolution, silent
+add-source errors, topic-cap gap, a double-decode crash. Final whole-branch
+review (17 commits): merge with fixes → applied in 53e28bc (Next 16 proxy
+convention for the admin gate — curl-verified; explicit turbopack root;
+branding/metadata; engines >=20). 27/27 tests, clean build.
+
+Process learning: subagent dispatches must carry an explicit "do not spawn
+agents" instruction — one fix task spiralled into a delegation loop of agents
+spawning agents doing nothing until stood down.
+
+Blocked on Jayasuriya (everything else done): .env.local keys, Supabase MCP
+auth (migrations), starter-source list sign-off, Vercel project. Deploy-time
+schema confirmations: articles.status default 'pending', sources.status
+default 'active'.
+
 ## 2026-07-04 — Reorder: core functionality first, signup last
 
 Jayasuriya asked to defer signup/auth and focus on core functionality.

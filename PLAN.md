@@ -18,25 +18,31 @@ Legend: `[ ]` pending · `[~]` in progress · `[x]` all five gates passed
 ## Phase 1 — Foundation (no auth UI)
 
 Plan: docs/superpowers/plans/2026-07-04-phase-1-foundation.md (tasks 7–9 deferred to Phase 4)
+`[~]` below = gates 1–4 passed (built/tested/reviewed/fixed); deploy gate pending Task 8.
 
-- [x] Next.js scaffold + tooling (TS, Tailwind, Vitest, ESLint)
+- [~] Next.js scaffold + tooling (TS, Tailwind, Vitest, ESLint)
 - [~] Supabase clients module (browser / server / service-role)
-- [ ] Migration 001: profiles, topics, profile_topics, auth trigger, RLS
-- [ ] Migration 002: sources, source_suggestions, articles, article_topics, RLS
-- [ ] Migration 003: bookmarks, upvotes (+count trigger), reads, RLS
-- [ ] Migration 004: squads, squad_members, squad_shares, RLS
-- [ ] Vercel deploy skeleton + live smoke check
+- [ ] Migration 001: profiles, topics, profile_topics, auth trigger, RLS (blocked: MCP auth)
+- [ ] Migration 002: sources, source_suggestions, articles, article_topics, RLS (blocked: MCP auth)
+- [ ] Migration 003: bookmarks, upvotes (+count trigger), reads, RLS (blocked: MCP auth)
+- [ ] Migration 004: squads, squad_members, squad_shares, RLS (blocked: MCP auth)
+- [ ] Vercel deploy skeleton + live smoke check (blocked: Vercel project)
 
 ## Phase 2 — Ingest + Admin (core engine)
 
-- [ ] URL canonicalization + dedupe lib
-- [ ] RSS fetch/parse module (per-source isolation, failure tracking)
-- [ ] `/api/ingest` cron route (CRON_SECRET)
-- [ ] Temporary admin gate via ADMIN_SECRET (swapped for is_admin in Phase 4)
-- [ ] Approval queue UI (approve+tag / reject)
-- [ ] Sources CRUD + health indicators
-- [ ] Seed initial sources (needs Jayasuriya's list)
-- [ ] Vercel cron configured + deployed
+Plan: docs/superpowers/plans/2026-07-04-phase-2-ingest-admin.md
+Final whole-branch review passed 2026-07-04 (fixes applied in 53e28bc). Branch merge-ready.
+
+- [~] URL canonicalization + dedupe lib
+- [~] RSS fetch/parse module (per-source isolation, failure tracking)
+- [~] Ingest orchestrator (failure isolation, auto-pause at 5)
+- [~] `/api/ingest` cron route (CRON_SECRET)
+- [~] Temporary admin gate via ADMIN_SECRET (Next 16 proxy convention; swapped for is_admin in Phase 4)
+- [~] Approval queue UI (approve+tag / reject)
+- [~] Sources CRUD + health indicators
+- [~] Seed script (list awaiting Jayasuriya's confirmation; run blocked on keys)
+- [ ] Vercel cron configured + deployed (blocked: user-assisted)
+- Deploy-time schema confirmations: articles.status default 'pending'; sources.status default 'active'
 
 ## Phase 3 — Public feed (core product)
 
