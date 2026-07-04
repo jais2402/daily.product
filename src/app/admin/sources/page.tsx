@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { listSources } from '@/lib/admin/queries';
 import { addSource } from './actions';
 import { SourceRowActions } from './source-row-actions';
@@ -6,16 +7,23 @@ export const dynamic = 'force-dynamic';
 
 async function addSourceAction(formData: FormData) {
   'use server';
-  await addSource(formData);
+  const result = await addSource(formData);
+  if (result?.error) redirect(`/admin/sources?error=${encodeURIComponent(result.error)}`);
 }
 
-export default async function AdminSourcesPage() {
+export default async function AdminSourcesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const sources = await listSources();
 
   return (
     <div className="flex flex-col gap-8">
       <section>
         <h2 className="mb-4 text-base font-semibold">Add source</h2>
+        {error && <p className="mb-4 text-red-600">{decodeURIComponent(error)}</p>}
         <form action={addSourceAction} className="flex flex-wrap gap-3">
           <input
             type="text"

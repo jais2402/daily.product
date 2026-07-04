@@ -33,8 +33,11 @@ export function QueueCard({ article, topics }: { article: Article; topics: Topic
   function toggleTopic(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else if (next.size < 5) {
+        next.add(id);
+      }
       return next;
     });
   }
@@ -95,17 +98,19 @@ export function QueueCard({ article, topics }: { article: Article; topics: Topic
         <div className="flex flex-wrap gap-2">
           {topics.map((topic) => {
             const active = selected.has(topic.id);
+            const isDisabled = !active && selected.size >= 5;
             return (
               <button
                 key={topic.id}
                 type="button"
                 onClick={() => toggleTopic(topic.id)}
                 aria-pressed={active}
+                disabled={isDisabled}
                 className={`rounded-full border px-3 py-1 text-xs ${
                   active
                     ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
                     : 'text-neutral-600 dark:text-neutral-400'
-                }`}
+                } ${isDisabled ? 'disabled:opacity-40' : ''}`}
               >
                 {topic.name}
               </button>
