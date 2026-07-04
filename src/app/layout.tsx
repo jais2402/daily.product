@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -19,6 +18,8 @@ export const metadata: Metadata = {
     "Curated daily content for product professionals — news, insights, and tools in one feed.",
 };
 
+// The public wordmark header lives in (public)/layout.tsx so admin pages
+// (which carry their own header) don't render two stacked headers.
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,14 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <header className="border-b p-4">
-          <Link href="/" className="text-lg font-bold hover:underline">
-            Daily.Product
-          </Link>
-        </header>
-        {children}
-      </body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }
