@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>PM Blog</title>
+    <item>
+      <title>How to prioritize</title>
+      <link>https://pmblog.com/prioritize/?utm_source=rss</link>
+      <description><![CDATA[<p>A framework for <b>prioritizing</b> features.</p>]]></description>
+      <dc:creator>Jane Doe</dc:creator>
+      <pubDate>Wed, 01 Jul 2026 10:00:00 GMT</pubDate>
+      <media:content url="https://pmblog.com/img/prio.png" medium="image"/>
+    </item>
+    <item>
+      <title>Broken item</title>
+      <link>not-a-url</link>
+    </item>
+  </channel>
+</rss>

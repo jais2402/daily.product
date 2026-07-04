@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Design Weekly</title>
+  <entry>
+    <title>Tokens at scale</title>
+    <link href="https://designweekly.io/tokens"/>
+    <summary>Managing design tokens across platforms.</summary>
+    <author><name>Sam Lee</name></author>
+    <updated>2026-06-28T09:00:00Z</updated>
+  </entry>
+</feed>
