@@ -13,11 +13,15 @@ const rssNoChannelLink = readFileSync(
   join(__dirname, 'fixtures/sample-rss-no-channel-link.xml'),
   'utf8'
 );
+const rssBrokenLinks = readFileSync(
+  join(__dirname, 'fixtures/sample-rss-broken-links.xml'),
+  'utf8'
+);
 
 describe('parseFeed', () => {
   it('parses RSS items with canonical urls and plain-text excerpts', async () => {
     const items = await parseFeed(rss);
-    expect(items).toHaveLength(1); // broken item dropped
+    expect(items).toHaveLength(1);
     expect(items[0]).toEqual({
       url: 'https://pmblog.com/prioritize',
       title: 'How to prioritize',
@@ -54,5 +58,22 @@ describe('parseFeed', () => {
     const items = await parseFeed(rssNoChannelLink, 'https://base.example.com/feed.xml');
     expect(items).toHaveLength(1);
     expect(items[0].url).toBe('https://base.example.com/posts/no-channel-link');
+  });
+
+  it('drops garbage links even when a base is available', async () => {
+    const items = await parseFeed(rssBrokenLinks, 'https://pmblog.com/rss');
+    const urls = items.map((i) => i.url);
+    expect(urls).toContain('https://pmblog.com/posts/good-absolute');
+    expect(urls).toContain('https://pmblog.com/posts/good-relative');
+    expect(urls).not.toContain('https://pmblog.com/not-a-url');
+    expect(urls).not.toContain('https://pmblog.com/rss/not-a-url');
+  });
+
+  it('drops garbage links without a base (original behavior)', async () => {
+    const noBaseFixture = rssBrokenLinks.replace(/<link>https:\/\/pmblog\.com<\/link>/, '');
+    const items = await parseFeed(noBaseFixture);
+    const urls = items.map((i) => i.url);
+    expect(urls).toContain('https://pmblog.com/posts/good-absolute');
+    expect(urls).not.toEqual(expect.arrayContaining([expect.stringContaining('not-a-url')]));
   });
 });

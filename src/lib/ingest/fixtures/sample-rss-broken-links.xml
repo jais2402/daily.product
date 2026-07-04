@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>PM Blog</title>
+    <link>https://pmblog.com</link>
+    <item>
+      <title>Valid absolute link post</title>
+      <link>https://pmblog.com/posts/good-absolute</link>
+      <description>A post with a valid absolute link.</description>
+      <pubDate>Wed, 01 Jul 2026 10:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Garbage link post</title>
+      <link>not-a-url</link>
+      <description>A post with a garbage, non-path-like link.</description>
+      <pubDate>Wed, 01 Jul 2026 10:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Relative link post</title>
+      <link>/posts/good-relative</link>
+      <description>A post with a valid path-like relative link.</description>
+      <pubDate>Wed, 01 Jul 2026 10:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>No link post</title>
+      <description>A post with no link at all.</description>
+      <pubDate>Wed, 01 Jul 2026 10:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

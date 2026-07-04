@@ -66,11 +66,20 @@ function toPlainText(html: string): string {
 
 const EXCERPT_MAX = 300;
 
+// WHATWG `new URL(x, base)` happily resolves any garbage string `x` into a
+// plausible-looking URL under `base` (e.g. `new URL('not-a-url', 'https://x.com')`
+// => `https://x.com/not-a-url`). That would turn malformed `<link>` values into
+// fake article URLs instead of dropping them. So we only attempt base-relative
+// resolution when the link is actually path-like (starts with /, ./, ../, ?, or #
+// after trimming) — anything else must already be an absolute URL, otherwise it's
+// dropped. This is a deliberate conservative trade-off: bare-word relative links
+// like `posts/x` (rare in real feeds) get dropped rather than risk junk articles.
+const PATH_LIKE = /^(\.{0,2}\/|\?|#)/;
+
 function resolveItemUrl(link: string, base: string | null): string | null {
   const trimmed = link.trim();
-  if (!base) return canonicalizeUrl(trimmed);
+  if (!base || !PATH_LIKE.test(trimmed)) return canonicalizeUrl(trimmed);
   try {
-    // If `trimmed` is already absolute, `new URL` ignores `base` and uses it directly.
     const resolved = new URL(trimmed, base);
     return canonicalizeUrl(resolved.toString());
   } catch {
