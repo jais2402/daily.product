@@ -14,9 +14,11 @@ export const STARTER_SOURCES = [
   { name: 'Product Talk', site_url: 'https://www.producttalk.org', feed_url: 'https://www.producttalk.org/feed/' },
   { name: 'Roman Pichler', site_url: 'https://www.romanpichler.com/blog', feed_url: 'https://www.romanpichler.com/blog/feed/' },
   // Product & Startups
+  // NOTE: Mind the Product and a16z RSS feeds were discontinued upstream (verified 2026-07-04);
+  // their DB rows are paused. Replace via /admin/sources when substitutes are chosen.
   { name: 'Andrew Chen', site_url: 'https://andrewchen.com', feed_url: 'https://andrewchen.com/feed/' },
   { name: 'Andreessen Horowitz (a16z)', site_url: 'https://a16z.com', feed_url: 'https://a16z.com/feed/' },
-  { name: 'First Round Review', site_url: 'https://review.firstround.com', feed_url: 'https://review.firstround.com/feed.xml' },
+  { name: 'First Round Review', site_url: 'https://review.firstround.com', feed_url: 'https://review.firstround.com/articles/rss' },
   { name: 'Stratechery', site_url: 'https://stratechery.com', feed_url: 'https://stratechery.com/feed/' },
   { name: 'The Pragmatic Engineer', site_url: 'https://newsletter.pragmaticengineer.com', feed_url: 'https://newsletter.pragmaticengineer.com/feed' },
   // Economics
