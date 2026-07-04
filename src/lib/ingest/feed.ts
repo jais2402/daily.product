@@ -25,7 +25,6 @@ const NAMED_ENTITIES: Record<string, string> = {
   lt: '<',
   gt: '>',
   quot: '"',
-  '#39': "'",
   apos: "'",
   nbsp: ' ',
   mdash: '—',

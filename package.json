@@ -1,7 +1,10 @@
 {
-  "name": "dp-scaffold",
+  "name": "daily-product",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
