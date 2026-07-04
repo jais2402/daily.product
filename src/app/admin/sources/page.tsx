@@ -23,7 +23,7 @@ export default async function AdminSourcesPage({
     <div className="flex flex-col gap-8">
       <section>
         <h2 className="mb-4 text-base font-semibold">Add source</h2>
-        {error && <p className="mb-4 text-red-600">{decodeURIComponent(error)}</p>}
+        {error && <p className="mb-4 text-red-600">{error}</p>}
         <form action={addSourceAction} className="flex flex-wrap gap-3">
           <input
             type="text"
