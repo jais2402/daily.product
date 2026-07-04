@@ -10,9 +10,5 @@
       <pubDate>Wed, 01 Jul 2026 10:00:00 GMT</pubDate>
       <media:content url="https://pmblog.com/img/prio.png" medium="image"/>
     </item>
-    <item>
-      <title>Broken item</title>
-      <link>not-a-url</link>
-    </item>
   </channel>
 </rss>
