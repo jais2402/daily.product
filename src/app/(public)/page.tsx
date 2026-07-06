@@ -62,7 +62,11 @@ export default async function Home({
 
     const [{ data: bookmarkRows }, { data: countRows }] = await Promise.all([
       user
-        ? supabase.from('bookmarks').select('article_id').eq('user_id', user.id)
+        ? supabase
+            .from('bookmarks')
+            .select('article_id')
+            .eq('user_id', user.id)
+            .in('article_id', articleIds)
         : Promise.resolve({ data: [] as { article_id: string }[] }),
       supabase.from('articles').select('id,upvote_count').in('id', articleIds),
     ]);
@@ -73,7 +77,8 @@ export default async function Home({
       const { data: upvoteRows } = await supabase
         .from('upvotes')
         .select('article_id')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .in('article_id', articleIds);
       upvotedIds = new Set((upvoteRows ?? []).map((row) => row.article_id));
     }
 

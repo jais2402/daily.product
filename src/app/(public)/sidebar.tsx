@@ -3,46 +3,12 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { fetchTopicsWithCounts } from '@/lib/feed/queries';
 import { avatarUrl } from '@/lib/identity';
 import { roleLabel, type MemberRole } from '@/lib/roles';
+import { SidebarNav } from './sidebar-nav';
 
 // Lucide-style inline icons (stroke-2, 18px) per design-handoff.md Assets
 // section — no icon package dependency, matching the prototype's approach.
-function HomeIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <path d="M9 22V12h6v10" />
-    </svg>
-  );
-}
-
-function BookmarkIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
-function UsersIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
+// Home/Bookmarks/Squads/Profile icons live in sidebar-nav.tsx alongside the
+// nav rows that use them.
 function PlusIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -122,29 +88,7 @@ export async function Sidebar() {
       </div>
 
       {/* Nav */}
-      <Link
-        href="/"
-        className={`${NAV_ITEM_BASE} font-semibold text-acc`}
-        style={{ backgroundColor: 'rgba(139,124,248,.12)' }}
-      >
-        <HomeIcon />
-        <span>Home</span>
-      </Link>
-      <div className={`${NAV_ITEM_BASE} cursor-default text-muted`}>
-        <BookmarkIcon />
-        <span>Bookmarks</span>
-        <SoonTag />
-      </div>
-      <div className={`${NAV_ITEM_BASE} cursor-default text-muted`}>
-        <UsersIcon />
-        <span>Squads</span>
-        <SoonTag />
-      </div>
-      <div className={`${NAV_ITEM_BASE} cursor-default text-muted`}>
-        <UserIcon />
-        <span>Profile</span>
-        <SoonTag />
-      </div>
+      <SidebarNav />
 
       <div className="my-2.5 mx-1 h-px bg-border" />
 

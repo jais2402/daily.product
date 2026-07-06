@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useOptimistic, useTransition } from 'react';
+import { useOptimistic, useRef, useTransition } from 'react';
 import { toggleBookmark, toggleUpvote, logRead } from '../../interactions/actions';
 import { ShareButton } from './share-button';
 
@@ -67,7 +67,7 @@ export function ArticleActions({
   title,
 }: ArticleActionsProps) {
   const router = useRouter();
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   const [state, setOptimisticState] = useOptimistic<
     ArticleActionsState,
@@ -76,6 +76,12 @@ export function ArticleActions({
     ...current,
     ...update,
   }));
+
+  // Last-confirmed server truth, updated on every successful toggle. On
+  // error we revert to this ref rather than the pre-click closure snapshot,
+  // so a stale closure from a rapid double-click can't stomp a later
+  // confirmed state.
+  const serverState = useRef<ArticleActionsState>({ upvoted, upvoteCount, bookmarked });
 
   function handleUpvote() {
     if (!signedIn) {
@@ -90,8 +96,19 @@ export function ArticleActions({
       setOptimisticState({ upvoted: nextUpvoted, upvoteCount: nextCount });
       const result = await toggleUpvote(articleId);
       if (result.error) {
-        setOptimisticState({ upvoted: state.upvoted, upvoteCount: state.upvoteCount });
+        setOptimisticState({
+          upvoted: serverState.current.upvoted,
+          upvoteCount: serverState.current.upvoteCount,
+        });
+        return;
       }
+      const active = result.active ?? nextUpvoted;
+      const countDelta = active === serverState.current.upvoted ? 0 : active ? 1 : -1;
+      serverState.current = {
+        ...serverState.current,
+        upvoted: active,
+        upvoteCount: serverState.current.upvoteCount + countDelta,
+      };
     });
   }
 
@@ -107,8 +124,13 @@ export function ArticleActions({
       setOptimisticState({ bookmarked: nextBookmarked });
       const result = await toggleBookmark(articleId);
       if (result.error) {
-        setOptimisticState({ bookmarked: state.bookmarked });
+        setOptimisticState({ bookmarked: serverState.current.bookmarked });
+        return;
       }
+      serverState.current = {
+        ...serverState.current,
+        bookmarked: result.active ?? nextBookmarked,
+      };
     });
   }
 
@@ -123,6 +145,7 @@ export function ArticleActions({
       <button
         type="button"
         onClick={handleUpvote}
+        disabled={isPending}
         className="flex items-center gap-[7px] rounded-[10px] border px-4 py-2 text-[13.5px] font-semibold"
         style={
           state.upvoted
@@ -137,6 +160,7 @@ export function ArticleActions({
       <button
         type="button"
         onClick={handleBookmark}
+        disabled={isPending}
         className="flex items-center gap-[7px] rounded-[10px] border px-4 py-2 text-[13.5px] font-semibold"
         style={
           state.bookmarked

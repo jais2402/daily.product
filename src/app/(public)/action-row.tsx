@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useOptimistic, useTransition } from 'react';
+import { useOptimistic, useRef, useTransition } from 'react';
 import { toggleBookmark, toggleUpvote } from './interactions/actions';
 
 function ClockIcon() {
@@ -73,12 +73,18 @@ export function ActionRow({
   readMin,
 }: ActionRowProps) {
   const router = useRouter();
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   const [state, setOptimisticState] = useOptimistic<ActionRowState, Partial<ActionRowState>>(
     { upvoted, upvoteCount, bookmarked },
     (current, update) => ({ ...current, ...update }),
   );
+
+  // Last-confirmed server truth, updated on every successful toggle. On
+  // error we revert to this ref rather than the pre-click closure snapshot,
+  // so a stale closure from a rapid double-click can't stomp a later
+  // confirmed state.
+  const serverState = useRef<ActionRowState>({ upvoted, upvoteCount, bookmarked });
 
   function handleUpvote(e: React.MouseEvent) {
     e.preventDefault();
@@ -96,8 +102,19 @@ export function ActionRow({
       setOptimisticState({ upvoted: nextUpvoted, upvoteCount: nextCount });
       const result = await toggleUpvote(articleId);
       if (result.error) {
-        setOptimisticState({ upvoted: state.upvoted, upvoteCount: state.upvoteCount });
+        setOptimisticState({
+          upvoted: serverState.current.upvoted,
+          upvoteCount: serverState.current.upvoteCount,
+        });
+        return;
       }
+      const active = result.active ?? nextUpvoted;
+      const countDelta = active === serverState.current.upvoted ? 0 : active ? 1 : -1;
+      serverState.current = {
+        ...serverState.current,
+        upvoted: active,
+        upvoteCount: serverState.current.upvoteCount + countDelta,
+      };
     });
   }
 
@@ -116,8 +133,13 @@ export function ActionRow({
       setOptimisticState({ bookmarked: nextBookmarked });
       const result = await toggleBookmark(articleId);
       if (result.error) {
-        setOptimisticState({ bookmarked: state.bookmarked });
+        setOptimisticState({ bookmarked: serverState.current.bookmarked });
+        return;
       }
+      serverState.current = {
+        ...serverState.current,
+        bookmarked: result.active ?? nextBookmarked,
+      };
     });
   }
 
@@ -133,6 +155,7 @@ export function ActionRow({
       <button
         type="button"
         onClick={handleUpvote}
+        disabled={isPending}
         className={`flex items-center gap-[5px] ${state.upvoted ? 'text-green' : ''}`}
       >
         <span className={state.upvoted ? 'text-green' : 'text-current'}>
@@ -144,6 +167,7 @@ export function ActionRow({
       <button
         type="button"
         onClick={handleBookmark}
+        disabled={isPending}
         className={`ml-auto flex items-center ${state.bookmarked ? 'text-amber' : ''}`}
       >
         <BookmarkIcon filled={state.bookmarked} />
