@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { signInWithGoogle } from './actions';
+import { signInWithGoogle, signInWithPassword } from './actions';
 
 export default async function LoginPage({
   searchParams,
@@ -83,6 +83,38 @@ export default async function LoginPage({
               Continue with Google
             </button>
           </form>
+
+          {process.env.DEV_LOGIN === '1' && (
+            <>
+              <div className="flex items-center gap-3 py-1 text-[11px] uppercase tracking-[.08em] text-faint">
+                <span className="h-px flex-1 bg-border" />
+                dev sign in
+                <span className="h-px flex-1 bg-border" />
+              </div>
+              <form action={signInWithPassword} className="flex w-full flex-col gap-2.5">
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  required
+                  className="w-full rounded-[10px] border border-border bg-card p-3 text-[13.5px] text-text outline-none placeholder:text-faint"
+                />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  required
+                  className="w-full rounded-[10px] border border-border bg-card p-3 text-[13.5px] text-text outline-none placeholder:text-faint"
+                />
+                <button
+                  type="submit"
+                  className="w-full rounded-[10px] border border-border bg-card p-3 text-[13.5px] font-semibold text-muted transition-colors hover:border-acc hover:text-text"
+                >
+                  Sign in with email
+                </button>
+              </form>
+            </>
+          )}
         </div>
 
         <p className="text-xs leading-[1.5] text-faint">
