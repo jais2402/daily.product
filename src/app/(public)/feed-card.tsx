@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { FeedArticle } from '@/lib/feed/queries';
+import { ActionRow } from './action-row';
 
 // Source glyph tile colors (design-handoff.md Design Tokens — "source colors").
 const SOURCE_COLORS = [
@@ -61,27 +62,31 @@ function estimateReadMinutes(summary: string | null): number | null {
   return Math.max(1, Math.round(words / 220));
 }
 
-function ClockIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v5l3 2" />
-    </svg>
-  );
+interface FeedCardProps {
+  article: FeedArticle;
+  upvoteCount: number;
+  upvoted: boolean;
+  bookmarked: boolean;
+  signedIn: boolean;
 }
 
-export function FeedCard({ article }: { article: FeedArticle }) {
+export function FeedCard({
+  article,
+  upvoteCount,
+  upvoted,
+  bookmarked,
+  signedIn,
+}: FeedCardProps) {
   const date = formatRelativeDate(article.published_at);
   const readMin = estimateReadMinutes(article.summary);
   const firstTopic = article.topics[0]?.name ?? null;
   const glyph = (article.source_name ?? '?').charAt(0).toUpperCase();
+  const href = `/article/${article.id}`;
 
   return (
-    <Link
-      href={`/article/${article.id}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[border-color,transform] duration-150 hover:-translate-y-[3px] hover:border-acc"
-    >
-      <div
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[border-color,transform] duration-150 hover:-translate-y-[3px] hover:border-acc">
+      <Link
+        href={href}
         className="relative flex h-[150px] items-end p-3"
         style={
           article.image_url
@@ -105,7 +110,7 @@ export function FeedCard({ article }: { article: FeedArticle }) {
             {firstTopic}
           </span>
         )}
-      </div>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-[9px] p-4">
         <div className="flex items-center gap-2">
@@ -123,9 +128,11 @@ export function FeedCard({ article }: { article: FeedArticle }) {
           )}
         </div>
 
-        <h3 className="line-clamp-2 font-display text-[16.5px] font-semibold leading-[1.32] text-text">
-          {article.title}
-        </h3>
+        <Link href={href}>
+          <h3 className="line-clamp-2 font-display text-[16.5px] font-semibold leading-[1.32] text-text">
+            {article.title}
+          </h3>
+        </Link>
 
         {article.summary && (
           <p className="line-clamp-3 flex-1 text-[12.8px] leading-normal text-muted">
@@ -133,13 +140,15 @@ export function FeedCard({ article }: { article: FeedArticle }) {
           </p>
         )}
 
-        {readMin !== null && (
-          <div className="mt-1.5 flex items-center gap-[5px] text-[12.5px] text-faint">
-            <ClockIcon />
-            <span>{readMin} min read</span>
-          </div>
-        )}
+        <ActionRow
+          articleId={article.id}
+          upvoteCount={upvoteCount}
+          upvoted={upvoted}
+          bookmarked={bookmarked}
+          signedIn={signedIn}
+          readMin={readMin}
+        />
       </div>
-    </Link>
+    </div>
   );
 }

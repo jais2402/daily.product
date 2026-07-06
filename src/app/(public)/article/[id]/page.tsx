@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { ShareButton } from './share-button';
+import { ArticleActions } from './article-actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -99,6 +99,7 @@ interface ArticleDetail {
   author: string | null;
   published_at: string | null;
   source_name: string | null;
+  upvote_count: number;
   topics: ArticleTopic[];
 }
 
@@ -110,6 +111,7 @@ interface RawDetailRow {
   image_url: string | null;
   author: string | null;
   published_at: string | null;
+  upvote_count: number;
   sources: { name: string } | { name: string }[] | null;
   article_topics:
     | { topics: ArticleTopic | ArticleTopic[] | null }[]
@@ -123,7 +125,7 @@ async function fetchArticle(
   const { data, error } = await supabase
     .from('articles')
     .select(
-      'id,url,title,summary,image_url,author,published_at,sources(name),article_topics(topics(id,name,slug))',
+      'id,url,title,summary,image_url,author,published_at,upvote_count,sources(name),article_topics(topics(id,name,slug))',
     )
     .eq('status', 'approved')
     .eq('id', id)
@@ -148,6 +150,7 @@ async function fetchArticle(
     image_url: row.image_url,
     author: row.author,
     published_at: row.published_at,
+    upvote_count: row.upvote_count,
     source_name: source?.name ?? null,
     topics,
   };
@@ -221,6 +224,32 @@ export default async function ArticlePage({
   const related = firstTopic
     ? await fetchRelated(supabase, firstTopic.id, article.id)
     : [];
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const signedIn = Boolean(user);
+
+  let upvoted = false;
+  let bookmarked = false;
+  if (user) {
+    const [{ data: upvoteRow }, { data: bookmarkRow }] = await Promise.all([
+      supabase
+        .from('upvotes')
+        .select('article_id')
+        .eq('user_id', user.id)
+        .eq('article_id', article.id)
+        .maybeSingle(),
+      supabase
+        .from('bookmarks')
+        .select('article_id')
+        .eq('user_id', user.id)
+        .eq('article_id', article.id)
+        .maybeSingle(),
+    ]);
+    upvoted = Boolean(upvoteRow);
+    bookmarked = Boolean(bookmarkRow);
+  }
 
   return (
     <div className="mx-auto w-full max-w-[760px] px-7 pb-20 pt-[26px]">
@@ -296,17 +325,15 @@ export default async function ArticlePage({
         </div>
       )}
 
-      <div className="my-6 flex items-center gap-3 border-y border-border py-3">
-        <ShareButton title={article.title} url={article.url} />
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noreferrer"
-          className="ml-auto flex items-center gap-[7px] rounded-[11px] bg-acc px-5 py-2.5 font-display text-[13.5px] font-semibold text-[#0d1016]"
-        >
-          Read full article ↗
-        </a>
-      </div>
+      <ArticleActions
+        articleId={article.id}
+        upvoteCount={article.upvote_count}
+        upvoted={upvoted}
+        bookmarked={bookmarked}
+        signedIn={signedIn}
+        url={article.url}
+        title={article.title}
+      />
 
       {related.length > 0 && (
         <>
