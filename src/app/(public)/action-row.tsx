@@ -156,6 +156,8 @@ export function ActionRow({
         type="button"
         onClick={handleUpvote}
         disabled={isPending}
+        aria-label={state.upvoted ? 'Remove upvote' : 'Upvote'}
+        aria-pressed={state.upvoted}
         className={`flex items-center gap-[5px] ${state.upvoted ? 'text-green' : ''}`}
       >
         <span className={state.upvoted ? 'text-green' : 'text-current'}>
@@ -168,6 +170,8 @@ export function ActionRow({
         type="button"
         onClick={handleBookmark}
         disabled={isPending}
+        aria-label={state.bookmarked ? 'Remove bookmark' : 'Bookmark'}
+        aria-pressed={state.bookmarked}
         className={`ml-auto flex items-center ${state.bookmarked ? 'text-amber' : ''}`}
       >
         <BookmarkIcon filled={state.bookmarked} />

@@ -146,6 +146,7 @@ export function ArticleActions({
         type="button"
         onClick={handleUpvote}
         disabled={isPending}
+        aria-pressed={state.upvoted}
         className="flex items-center gap-[7px] rounded-[10px] border px-4 py-2 text-[13.5px] font-semibold"
         style={
           state.upvoted
@@ -161,6 +162,7 @@ export function ArticleActions({
         type="button"
         onClick={handleBookmark}
         disabled={isPending}
+        aria-pressed={state.bookmarked}
         className="flex items-center gap-[7px] rounded-[10px] border px-4 py-2 text-[13.5px] font-semibold"
         style={
           state.bookmarked

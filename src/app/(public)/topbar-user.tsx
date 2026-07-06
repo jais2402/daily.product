@@ -60,7 +60,7 @@ export async function TopbarUser() {
           <span className="text-[13px] font-semibold text-text">{streak}</span>
         </div>
       )}
-      <Link href="/profile">
+      <Link href="/profile" aria-label="Profile">
         {avatarSeed ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

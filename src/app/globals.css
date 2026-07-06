@@ -61,3 +61,18 @@ body {
 .animate-streak-pulse {
   animation: streak-pulse 2.4s ease-in-out infinite;
 }
+
+/*
+ * Accessibility pass (phase 8 task 2): visible keyboard focus ring on every
+ * interactive element, including inputs that use Tailwind's `outline-none`
+ * (login/onboarding/profile/squads text fields — those only remove the
+ * default focus ring so the `focus:border-acc` treatment reads cleanly, not
+ * to suppress focus visibility). `!important` is required here because
+ * Tailwind's utility layer is injected after this stylesheet and
+ * `.outline-none` (outline-style: none) would otherwise win the cascade at
+ * equal specificity and silently swallow the ring on those fields.
+ */
+:focus-visible {
+  outline: 2px solid var(--acc) !important;
+  outline-offset: 2px !important;
+}

@@ -12,6 +12,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "seed:sources": "node --env-file=.env.local node_modules/.bin/tsx scripts/seed-sources.ts",
     "grant:admin": "node --env-file=.env.local node_modules/.bin/tsx scripts/grant-admin.ts",
     "dev:user": "node --env-file=.env.local node_modules/.bin/tsx scripts/create-dev-user.ts"
@@ -27,6 +28,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
