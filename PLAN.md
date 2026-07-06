@@ -89,10 +89,12 @@ Plan: docs/superpowers/plans/2026-07-06-phase-5-interactions.md
 
 ## Phase 6 — Streaks + Profile
 
-- [ ] Streak calculation lib
-- [ ] 365-day activity grid component
-- [ ] Profile page (edit identity, role, topics)
-- [ ] Share-streak
+Plan: docs/superpowers/plans/2026-07-06-phase-6-streaks-profile.md
+
+- [~] Streak + activity math lib (UTC-pure, TDD)
+- [~] Profile page (§8: header, stats, 17×7 grid, weekly chart, editing)
+- [~] Streak chrome (topbar flame pill, rail card) + Profile nav
+- [~] Share-streak
 - [ ] Deployed
 
 ## Phase 7 — Squads
