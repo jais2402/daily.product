@@ -10,14 +10,17 @@ export const dynamic = 'force-dynamic';
 
 /**
  * `leaveSquad` redirects on success and only ever returns `{error}` on
- * failure (e.g. a stray DB error) — there's no inline error UI on this
- * subtle button, so a failed leave just leaves the user on the page. This
- * thin wrapper also satisfies Next's `<form action>` typing, which requires
+ * failure (e.g. a stray DB error). Previously this wrapper discarded that
+ * error, leaving a failed leave with no feedback — now it redirects back to
+ * this same squad page with `?error=1` so the page below can render an
+ * inline error line, same pattern as /admin/login. This wrapper also
+ * satisfies Next's `<form action>` typing, which requires
  * `void | Promise<void>` rather than the action's `ActionError | void`.
  */
 async function handleLeave(squadId: string): Promise<void> {
   'use server';
-  await leaveSquad(squadId);
+  const result = await leaveSquad(squadId);
+  if (result?.error) redirect(`/squads/${squadId}?error=1`);
 }
 
 const UUID_RE =
@@ -189,10 +192,13 @@ async function fetchShares(
 
 export default async function SquadDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error } = await searchParams;
 
   const supabase = await createServerSupabase();
 
@@ -236,6 +242,12 @@ export default async function SquadDetailPage({
           </button>
         </form>
       </div>
+
+      {error && (
+        <p className="mb-6 text-[13px] text-red-500">
+          Couldn&apos;t leave the squad. Try again.
+        </p>
+      )}
 
       <div className="grid gap-[26px] lg:grid-cols-[1fr_280px] lg:items-start">
         <section className="flex flex-col gap-3.5">

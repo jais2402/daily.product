@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { FeedTopicWithId } from '@/lib/feed/queries';
+import type { FeedTopicWithId, RecommendedArticle } from '@/lib/feed/queries';
 
 // Level colors 0->4, from design-handoff.md §8 "Level colors" — reused here
 // for the rail's 7-cell mini activity bar (§5 card 1).
@@ -107,6 +107,60 @@ function sourceColor(sourceName: string): string {
   return SOURCE_COLORS[hashString(sourceName) % SOURCE_COLORS.length];
 }
 
+// Duplicated from feed-card.tsx / article/[id]/page.tsx — small,
+// presentation-only helper; not worth promoting to a shared module for a
+// single-file addition (see rail.tsx's own precedent for SOURCE_COLORS).
+function formatRelativeDate(published_at: string | null): string | null {
+  if (!published_at) return null;
+  const date = new Date(published_at);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60_000);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) return 'now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 30) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+/**
+ * Shared row idiom for the rail's article-list cards ("You might like",
+ * "Recent bookmarks"): 22px source glyph tile + line-clamp-2 title +
+ * "source · relative date" — same visual language as the article detail
+ * page's "You might also like" rows (article/[id]/page.tsx).
+ */
+function ArticleRow({ article }: { article: RecommendedArticle }) {
+  const date = formatRelativeDate(article.published_at);
+  const glyph = (article.source_name ?? '?').charAt(0).toUpperCase();
+
+  return (
+    <Link
+      href={`/article/${article.id}`}
+      className="flex items-start gap-2.5 rounded-lg -mx-1 px-1 py-1 hover:bg-card2"
+    >
+      <span
+        className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] text-[11px] font-bold text-[#0d1016]"
+        style={{ backgroundColor: sourceColor(article.source_name ?? 'unknown') }}
+      >
+        {glyph}
+      </span>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="line-clamp-2 text-[13px] font-medium leading-[1.35] text-text">
+          {article.title}
+        </span>
+        <span className="text-[11.5px] text-faint">
+          {article.source_name ?? 'Unknown source'}
+          {date ? ` · ${date}` : ''}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 interface RawSourceRow {
   sources: { name: string } | { name: string }[] | null;
 }
@@ -147,10 +201,16 @@ export async function Rail({
   supabase,
   topics,
   streak,
+  recommendations,
+  recentBookmarks,
 }: {
   supabase: SupabaseClient;
   topics: FeedTopicWithId[];
   streak: StreakInfo | null;
+  /** Signed-in only; null when signed out or when there are no matches. */
+  recommendations: RecommendedArticle[] | null;
+  /** Signed-in only; null when signed out or when there are no bookmarks. */
+  recentBookmarks: RecommendedArticle[] | null;
 }) {
   const topSources = await fetchTopSources(supabase);
 
@@ -183,6 +243,40 @@ export async function Rail({
           ))}
         </div>
       </div>
+
+      {recommendations && recommendations.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <h2 className="mb-3.5 font-display text-[15px] font-semibold text-text">
+            You might like
+          </h2>
+          <div className="flex flex-col gap-3">
+            {recommendations.map((article) => (
+              <ArticleRow key={article.id} article={article} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {recentBookmarks && recentBookmarks.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="mb-3.5 flex items-center justify-between">
+            <h2 className="font-display text-[15px] font-semibold text-text">
+              Recent bookmarks
+            </h2>
+            <Link
+              href="/bookmarks"
+              className="text-[12px] font-semibold text-acc hover:underline"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="flex flex-col gap-3">
+            {recentBookmarks.map((article) => (
+              <ArticleRow key={article.id} article={article} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="rounded-2xl border border-border bg-card p-4">
         <h2 className="font-display text-[15px] font-semibold text-text">

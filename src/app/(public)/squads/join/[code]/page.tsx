@@ -6,14 +6,17 @@ const INVITE_CODE_RE = /^[a-z2-7]{16}$/;
 
 /**
  * `joinSquad` redirects on success and only ever returns `{error}` on
- * failure — there's no inline error UI on this confirm-button form, so a
- * failed join just leaves the user on the page. This thin wrapper also
- * satisfies Next's `<form action>` typing, which requires
- * `void | Promise<void>` rather than the action's `ActionError | void`.
+ * failure. Previously this wrapper discarded that error, leaving a failed
+ * join with no feedback — now it redirects back to this same page with
+ * `?error=1` (preserving the code) so the page below can render an inline
+ * error line, same pattern as /admin/login. This wrapper also satisfies
+ * Next's `<form action>` typing, which requires `void | Promise<void>`
+ * rather than the action's `ActionError | void`.
  */
 async function handleJoin(code: string): Promise<void> {
   'use server';
-  await joinSquad(code);
+  const result = await joinSquad(code);
+  if (result?.error) redirect(`/squads/join/${code}?error=1`);
 }
 
 /**
@@ -24,10 +27,13 @@ async function handleJoin(code: string): Promise<void> {
  */
 export default async function JoinSquadPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ code: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { code } = await params;
+  const { error } = await searchParams;
 
   const supabase = await createServerSupabase();
   const {
@@ -46,6 +52,11 @@ export default async function JoinSquadPage({
         <p className="mt-2 text-[13.5px] text-muted">
           You&apos;ve been invited to join a squad on Daily.Product.
         </p>
+        {error && (
+          <p className="mt-3 text-[13px] text-red-500">
+            Couldn&apos;t join this squad — the invite may be invalid.
+          </p>
+        )}
         <form action={handleJoin.bind(null, code)} className="mt-5">
           <button
             type="submit"

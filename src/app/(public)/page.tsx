@@ -1,7 +1,13 @@
 import Link from 'next/link';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { parseFeedParams, type FeedTab } from '@/lib/feed/params';
-import { fetchFeedPage, fetchTopicsWithCounts } from '@/lib/feed/queries';
+import {
+  fetchFeedPage,
+  fetchTopicsWithCounts,
+  fetchRecommendations,
+  fetchRecentBookmarks,
+  type RecommendedArticle,
+} from '@/lib/feed/queries';
 import { currentStreak } from '@/lib/streaks';
 import { FeedCard } from './feed-card';
 import { Rail, type StreakInfo } from './rail';
@@ -81,6 +87,20 @@ export default async function Home({
     const last7Counts = last7.map((d) => countsByDate.get(d) ?? 0);
 
     streak = { days, readToday, last7Counts };
+  }
+
+  // "You might like" + "Recent bookmarks" rail cards (Phase 8 Task 1) are
+  // signed-in only, same page.tsx-fetches/passes-props pattern as `streak`
+  // above — Rail is only ever rendered here, so no need for it to re-derive
+  // auth itself. `null` (vs empty array) distinguishes "signed out" from
+  // "signed in but no matches", though Rail treats both as "omit the card".
+  let recommendations: RecommendedArticle[] | null = null;
+  let recentBookmarks: RecommendedArticle[] | null = null;
+  if (user) {
+    [recommendations, recentBookmarks] = await Promise.all([
+      fetchRecommendations(supabase, user.id),
+      fetchRecentBookmarks(supabase, user.id),
+    ]);
   }
 
   let bookmarkedIds = new Set<string>();
@@ -214,7 +234,13 @@ export default async function Home({
         )}
       </div>
 
-      <Rail supabase={supabase} topics={topics} streak={streak} />
+      <Rail
+        supabase={supabase}
+        topics={topics}
+        streak={streak}
+        recommendations={recommendations}
+        recentBookmarks={recentBookmarks}
+      />
     </main>
   );
 }

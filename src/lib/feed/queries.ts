@@ -319,6 +319,170 @@ export async function fetchFeedPage(
   return fetchOrderedPage(supabase, { topicSlug, page }, tab);
 }
 
+/**
+ * Cap on how many of the user's most-recent read/bookmark ids are pulled to
+ * build the exclusion list for recommendations. At MVP interaction volumes
+ * this comfortably covers "articles the user has already seen" without an
+ * unbounded query; if a user has more than this many reads or bookmarks, the
+ * oldest ones stop being excluded (acceptable — recs are a "might like"
+ * nice-to-have, not a hard dedup guarantee).
+ */
+const RECS_EXCLUSION_CAP = 200;
+
+export interface RecommendedArticle {
+  id: string;
+  title: string;
+  source_name: string | null;
+  published_at: string | null;
+}
+
+interface RecRow {
+  id: string;
+  title: string;
+  published_at: string | null;
+  sources: { name: string } | { name: string }[] | null;
+}
+
+function mapRecRow(row: RecRow): RecommendedArticle {
+  const source = Array.isArray(row.sources) ? row.sources[0] : row.sources;
+  return {
+    id: row.id,
+    title: row.title,
+    source_name: source?.name ?? null,
+    published_at: row.published_at,
+  };
+}
+
+/** Most recent (capped) article ids a user has read. */
+async function fetchRecentReadIds(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('reads')
+    .select('article_id,created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(RECS_EXCLUSION_CAP);
+  if (error) throw new Error(error.message);
+  return Array.from(
+    new Set((data ?? []).map((row) => row.article_id as string)),
+  );
+}
+
+/** Most recent (capped) article ids a user has bookmarked. */
+async function fetchRecentBookmarkIds(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('bookmarks')
+    .select('article_id,created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(RECS_EXCLUSION_CAP);
+  if (error) throw new Error(error.message);
+  return Array.from(
+    new Set((data ?? []).map((row) => row.article_id as string)),
+  );
+}
+
+/**
+ * Recommendations v1 (MVP design spec §5): unread, non-bookmarked approved
+ * articles matching the user's chosen topics (`profile_topics`), ranked
+ * recency first then upvote_count. Returns a light shape — just what the
+ * rail card needs — rather than the full `FeedArticle` mapping, since topics
+ * aren't rendered here.
+ *
+ * Exclusion uses `.not('id', 'in', (...))` with PostgREST's literal list
+ * syntax (NOT the `.in()` array helper, which is for inclusion filters).
+ * Both id lists are capped at `RECS_EXCLUSION_CAP` (see constant doc) — safe
+ * for a `.not(...)` clause of that size. When a list is empty, the `.not()`
+ * call is skipped entirely: PostgREST's `not.in.()` (empty parens) is
+ * malformed and errors, so an empty exclusion set must omit the clause
+ * rather than pass an empty literal list.
+ */
+export async function fetchRecommendations(
+  supabase: SupabaseClient,
+  userId: string,
+  limit = 4,
+): Promise<RecommendedArticle[]> {
+  const { data: topicRows, error: topicError } = await supabase
+    .from('profile_topics')
+    .select('topic_id')
+    .eq('profile_id', userId);
+  if (topicError) throw new Error(topicError.message);
+
+  const topicIds = (topicRows ?? []).map((row) => row.topic_id as string);
+  if (topicIds.length === 0) return [];
+
+  const [readIds, bookmarkIds] = await Promise.all([
+    fetchRecentReadIds(supabase, userId),
+    fetchRecentBookmarkIds(supabase, userId),
+  ]);
+  const excludeIds = Array.from(new Set([...readIds, ...bookmarkIds]));
+
+  let query = supabase
+    .from('articles')
+    .select('id,title,published_at,sources(name),article_topics!inner(topic_id)')
+    .eq('status', 'approved')
+    .in('article_topics.topic_id', topicIds);
+
+  if (excludeIds.length > 0) {
+    query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+  }
+
+  // The inner join against article_topics can return an article once per
+  // matching topic id when it has more than one topic overlapping the
+  // user's selections — over-fetch a bit so de-duping below still leaves up
+  // to `limit` distinct articles.
+  const { data, error } = await query
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .order('upvote_count', { ascending: false })
+    .limit(limit * 3);
+  if (error) throw new Error(error.message);
+
+  const seen = new Set<string>();
+  const rows: RecommendedArticle[] = [];
+  for (const row of (data ?? []) as unknown as RecRow[]) {
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+    rows.push(mapRecRow(row));
+    if (rows.length === limit) break;
+  }
+  return rows;
+}
+
+interface RecentBookmarkRow {
+  articles: RecRow | RecRow[] | null;
+}
+
+/**
+ * The `limit` most recently bookmarked articles for a user, light shape for
+ * the rail's "Recent bookmarks" card. Bookmarks pointing at an article
+ * that's since been unapproved are dropped defensively (mirrors
+ * /bookmarks page.tsx's fetchBookmarkedArticles).
+ */
+export async function fetchRecentBookmarks(
+  supabase: SupabaseClient,
+  userId: string,
+  limit = 3,
+): Promise<RecommendedArticle[]> {
+  const { data, error } = await supabase
+    .from('bookmarks')
+    .select('articles!inner(id,title,published_at,status,sources(name))')
+    .eq('user_id', userId)
+    .eq('articles.status', 'approved')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(error.message);
+
+  return ((data ?? []) as unknown as RecentBookmarkRow[])
+    .map((row) => (Array.isArray(row.articles) ? row.articles[0] : row.articles))
+    .filter((article): article is RecRow => article != null)
+    .map(mapRecRow);
+}
+
 export interface FeedTopicWithId extends FeedTopic {
   id: string;
 }
