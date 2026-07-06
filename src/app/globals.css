@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
+/*
+ * Daily.Product design tokens (docs/design/design-handoff.md — Design
+ * Tokens section). This pass is dark-first: the palette is unconditional,
+ * there is no light-mode media split.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0d1016;
+  --panel: #12161d;
+  --card: #161b22;
+  --card2: #1a2029;
+  --border: #232b35;
+  --text: #e7edf3;
+  --muted: #9aa6b2;
+  --faint: #6b7683;
+  --acc: #8b7cf8;
+  --amber: #f6a723;
+  --green: #34d399;
+  --blue: #6ea8fe;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-card: var(--card);
+  --color-card2: var(--card2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-acc: var(--acc);
+  --color-amber: var(--amber);
+  --color-green: var(--green);
+  --color-blue: var(--blue);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
 }

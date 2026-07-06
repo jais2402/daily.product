@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -18,8 +20,9 @@ export const metadata: Metadata = {
     "Curated daily content for product professionals — news, insights, and tools in one feed.",
 };
 
-// The public wordmark header lives in (public)/layout.tsx so admin pages
-// (which carry their own header) don't render two stacked headers.
+// The public app shell (sidebar + topbar) lives in (public)/layout.tsx so
+// admin pages (which carry their own header) don't render two stacked
+// headers. This root layout only owns fonts, metadata, and base tokens.
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +31,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
