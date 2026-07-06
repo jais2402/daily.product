@@ -108,12 +108,25 @@ Plan: docs/superpowers/plans/2026-07-06-phase-7-squads.md
 
 ## Phase 8 — Recommendations + Launch polish
 
-- [ ] Recommendations query (topics + recency + upvotes)
-- [ ] Sidebar widgets (recent bookmarks, recs)
-- [ ] Source suggestions review (user-facing "Add Source" needs auth)
-- [ ] Dark mode QA + accessibility pass
-- [ ] Playwright smoke tests (3 critical paths)
-- [ ] Production deploy + cron live
+Plan: docs/superpowers/plans/2026-07-06-phase-8-recs-polish.md
+Final whole-branch review 2 passed (fix applied in de63a5f: admin-action auth guards).
+
+- [~] Recommendations rail (topics + recency + upvotes, read/bookmark exclusion)
+- [~] Recent bookmarks widget + join/leave error surfacing
+- [~] Accessibility pass (aria labels, focus-visible)
+- [~] Playwright smoke suite (3 critical paths, green incl. full auth loop)
+- Note: user-facing "Add Source" suggestions deferred post-launch (admin add works)
+- [ ] Production deploy + cron live (user-assisted)
+
+## Launch checklist (user-side)
+
+1. Apply migration 005 (supabase/migrations/005_public_sources.sql — SQL editor)
+2. Vercel: import repo, env vars (URL/anon/service-role/ADMIN_SECRET/CRON_SECRET) — **DEV_LOGIN must remain UNSET in production**
+3. Merge PR #1
+4. Enable Google provider in Supabase + add production URL to Auth redirect list
+5. First deploy → live smoke: feed renders, /admin gate, curl ingest with CRON_SECRET
+6. `npm run grant:admin -- <your-google-email>` after first sign-in
+7. Signed-in click-through: rail cards (streak/recs/bookmarks), squad join/leave error banners
 
 ## Blocked on Jayasuriya
 

@@ -2,6 +2,28 @@
 
 Architecture decisions and session log. Newest entries first.
 
+## 2026-07-06 — Phases 5-8 complete: ALL code phases done, launch-ready
+
+Autonomous run per Jayasuriya's "complete all the phases": Phase 5 interactions
+(bookmark/upvote/read actions with optimistic UI, New/Hot/Most Read/Top tabs —
+review caught a cross-page duplicate-backfill Critical, fixed with pure
+composeRankedPage; §7 bookmarks screen); Phase 6 streaks/profile (UTC-pure
+streak math, §8 profile with 17×7 activity grid + weekly chart + editing —
+review caught chart semantics mislabel, fixed with raw-vs-distinct modes;
+flame pill + rail streak card); Phase 7 squads (invite codes, RLS-choreographed
+create/join/share/leave with the one sanctioned service-client read; §9 UI —
+review caught silently no-oping cleanup delete, fixed via admin client);
+Phase 8 (topic-based recommendations + recent-bookmarks rail, join/leave error
+surfacing, aria/focus-visible a11y pass, Playwright smoke suite — 3/3 green
+including the full dev-login auth loop with onboarding).
+
+Final whole-branch review 2 (46 commits): service-role containment audited
+clean; one Important fixed pre-merge (admin server actions now assert
+authorization internally — layouts don't guard action POSTs); DEV_LOGIN
+prod-unset added to launch checklist. 96 unit tests + 3 e2e, build clean.
+
+Everything now waits on user-side ops only (launch checklist in PLAN.md).
+
 ## 2026-07-06 — Phase 4: auth + onboarding code complete
 
 Four reviewed tasks: identity generator (verbatim from original plan);
