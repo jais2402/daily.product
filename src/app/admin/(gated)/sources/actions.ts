@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { createAdminSupabase } from '@/lib/supabase/admin';
+import { assertAdminAccess } from '@/lib/admin/access';
 
 const sourceSchema = z.object({
   name: z.string().trim().min(2).max(80),
@@ -11,6 +12,7 @@ const sourceSchema = z.object({
 });
 
 export async function addSource(formData: FormData) {
+  if (!(await assertAdminAccess())) return { error: 'Not authorized' };
   const parsed = sourceSchema.safeParse({
     name: formData.get('name'),
     site_url: formData.get('site_url'),
@@ -25,6 +27,7 @@ export async function addSource(formData: FormData) {
 }
 
 export async function toggleSource(input: unknown) {
+  if (!(await assertAdminAccess())) return { error: 'Not authorized' };
   const parsed = z
     .object({ id: z.string().uuid(), to: z.enum(['active', 'paused']) })
     .safeParse(input);

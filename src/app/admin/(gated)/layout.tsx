@@ -1,47 +1,22 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { ADMIN_COOKIE, isValidAdminKey } from '@/lib/admin/gate';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { assertAdminAccess } from '@/lib/admin/access';
 
 /**
  * Full authorization decision for /admin/* (except /admin/login, which
  * lives as a sibling outside this route group and is never wrapped by this
  * layout — avoiding a redirect loop).
  *
- * Fail-closed order:
- *   1. Valid legacy `dp_admin` cookie → allow (transition fallback).
- *   2. Signed-in user whose own profile has `is_admin = true` → allow.
- *   3. Otherwise → redirect('/admin/login').
+ * The actual decision lives in assertAdminAccess() (src/lib/admin/access.ts)
+ * so it can be shared with server actions, which are POSTed directly and
+ * bypass this layout's render-time check entirely.
  *
  * proxy.ts no longer makes this decision for /admin/*; it only refreshes
  * the Supabase session and passes requests through, since the layout has
  * DB access and can check `is_admin` safely.
  */
-async function assertAdmin() {
-  const cookieStore = await cookies();
-  const key = cookieStore.get(ADMIN_COOKIE)?.value;
-  if (isValidAdminKey(key, process.env.ADMIN_SECRET)) return;
-
-  const supabase = await createServerSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .single();
-    if (profile?.is_admin) return;
-  }
-
-  redirect('/admin/login');
-}
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await assertAdmin();
+  if (!(await assertAdminAccess())) redirect('/admin/login');
 
   return (
     <div className="mx-auto min-h-screen max-w-4xl p-6">

@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { createAdminSupabase } from '@/lib/supabase/admin';
+import { assertAdminAccess } from '@/lib/admin/access';
 
 const approveSchema = z.object({
   articleId: z.string().uuid(),
@@ -10,6 +11,7 @@ const approveSchema = z.object({
 });
 
 export async function approveArticle(input: unknown) {
+  if (!(await assertAdminAccess())) return { error: 'Not authorized' };
   const parsed = approveSchema.safeParse(input);
   if (!parsed.success) return { error: 'Pick 1-5 topics' };
   const { articleId, topicIds } = parsed.data;
@@ -32,6 +34,7 @@ export async function approveArticle(input: unknown) {
 }
 
 export async function rejectArticle(input: unknown) {
+  if (!(await assertAdminAccess())) return { error: 'Not authorized' };
   const parsed = z.object({ articleId: z.string().uuid() }).safeParse(input);
   if (!parsed.success) return { error: 'Invalid article' };
   const db = createAdminSupabase();
