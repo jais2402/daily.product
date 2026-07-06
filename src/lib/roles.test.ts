@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ROLES, defaultTopicSlugsForRole, type MemberRole } from './roles';
+import { ROLES, defaultTopicSlugsForRole, roleLabel, type MemberRole } from './roles';
 
 const ALL_ROLES: MemberRole[] = [
   'pm',
@@ -32,5 +32,16 @@ describe('roles', () => {
         expect(slug).toMatch(/^[a-z0-9-]+$/);
       }
     }
+  });
+
+  it('roleLabel maps other and null/undefined to Product Enthusiast', () => {
+    expect(roleLabel('other')).toBe('Product Enthusiast');
+    expect(roleLabel(null)).toBe('Product Enthusiast');
+    expect(roleLabel(undefined)).toBe('Product Enthusiast');
+  });
+
+  it('roleLabel returns the card label for named roles', () => {
+    expect(roleLabel('pm')).toBe('Product Manager');
+    expect(roleLabel('designer')).toBe('Product Designer');
   });
 });

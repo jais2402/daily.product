@@ -77,3 +77,21 @@ const DEFAULTS: Record<MemberRole, string[]> = {
 export function defaultTopicSlugsForRole(role: MemberRole): string[] {
   return DEFAULTS[role];
 }
+
+// Short label for chrome surfaces (sidebar/topbar user cell) — distinct from
+// the longer onboarding card `label` above. `other` and unset/null roles
+// fall back to a friendly generic label rather than exposing the raw enum.
+const ROLE_LABELS: Record<MemberRole, string> = {
+  pm: 'Product Manager',
+  apm: 'Associate PM',
+  designer: 'Product Designer',
+  marketer: 'Product Marketer',
+  founder: 'Founder / CPO',
+  developer: 'Developer',
+  other: 'Product Enthusiast',
+};
+
+export function roleLabel(role: MemberRole | null | undefined): string {
+  if (!role) return 'Product Enthusiast';
+  return ROLE_LABELS[role];
+}

@@ -1,5 +1,5 @@
 import { listPending, listTopics } from '@/lib/admin/queries';
-import { QueueCard } from './queue-card';
+import { QueueCard } from '../queue-card';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,4 +1,5 @@
 import { Sidebar } from './sidebar';
+import { TopbarUser } from './topbar-user';
 
 function SearchIcon() {
   return (
@@ -47,6 +48,10 @@ export default function PublicLayout({
               placeholder="Search articles…"
               className="w-full rounded-[10px] border border-border bg-card py-2.5 pl-[38px] pr-3.5 text-[13.5px] text-text outline-none placeholder:text-faint"
             />
+          </div>
+
+          <div className="ml-auto flex items-center">
+            <TopbarUser />
           </div>
         </div>
         {children}

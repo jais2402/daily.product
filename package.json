@@ -12,7 +12,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:sources": "node --env-file=.env.local node_modules/.bin/tsx scripts/seed-sources.ts"
+    "seed:sources": "node --env-file=.env.local node_modules/.bin/tsx scripts/seed-sources.ts",
+    "grant:admin": "node --env-file=.env.local node_modules/.bin/tsx scripts/grant-admin.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
