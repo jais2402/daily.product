@@ -54,6 +54,17 @@ Plan: docs/superpowers/plans/2026-07-04-phase-3-public-feed.md
 - [~] Article detail view + Read More CTA
 - [ ] Deployed — at this point the product is publicly usable read-only (blocked: Vercel project)
 
+## Design pass — hifi handoff applied to public surface (2026-07-06)
+
+Plan: docs/superpowers/plans/2026-07-06-design-pass-public-surface.md · Spec: docs/design/design-handoff.md
+
+- [~] Design tokens + fonts (dark-only, Space Grotesk / IBM Plex Sans)
+- [~] App shell (248px sidebar, topbar, Soon-tagged future nav)
+- [~] Feed restyle (cards, segmented tabs, 296px rail)
+- [~] Article reader restyle (TL;DR, share, related)
+- [ ] Migration 005 applied (sources public read) — pending user
+- Later phases (4-7) build their screens to this same handoff spec.
+
 ## Phase 4 — Auth + onboarding (deferred signup)
 
 - [ ] Identity generator (name + avatar seed) lib

@@ -2,6 +2,20 @@
 
 Architecture decisions and session log. Newest entries first.
 
+## 2026-07-06 — Hifi design pass on the public surface
+
+Jayasuriya delivered a complete design handoff (9 screens, tokens, interactive
+prototype) — imported to docs/design/ as the permanent visual source of truth.
+Applied to everything built so far in three reviewed tasks: dark-only token
+system + Space Grotesk/IBM Plex Sans; 248px sidebar app shell (future nav
+Soon-tagged, no faked auth elements); designed feed (cards with hsl-hash
+gradient fallbacks, segmented tabs with only New enabled, 296px rail with top
+sources + trending tags); designed article reader (TL;DR callout, share
+client component, same-topic related grid). Bookmarks/profile/squads/login
+screens from the handoff are built in Phases 4-7 against the same spec.
+Found day-one RLS gap: sources table was admin-only, nulling public source
+names — migration 005 committed (pending apply).
+
 ## 2026-07-04 — Data live + Phase 3 public feed built
 
 Migrations applied (user via MCP), 30 sources seeded, first live ingest ran:
