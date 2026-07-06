@@ -67,10 +67,14 @@ Plan: docs/superpowers/plans/2026-07-06-design-pass-public-surface.md · Spec: d
 
 ## Phase 4 — Auth + onboarding (deferred signup)
 
-- [ ] Identity generator (name + avatar seed) lib
-- [ ] Google OAuth sign-in + session middleware
-- [ ] Onboarding flow (role → identity → topics)
-- [ ] Swap admin gate to is_admin
+Plan: docs/superpowers/plans/2026-07-06-phase-4-auth-onboarding.md
+
+- [~] Identity generator (name + avatar seed) lib
+- [~] Google OAuth sign-in + session proxy + designed login (screen §1)
+- [~] Onboarding flow — designed role cards + topic chips (screens §2–3)
+- [~] Auth-aware chrome (sidebar user cell, topbar) + is_admin gate (legacy cookie fallback)
+- [ ] Live OAuth loop verified (needs Google provider enabled in Supabase)
+- [ ] grant:admin run for Jayasuriya's account
 - [ ] Deployed
 
 ## Phase 5 — Interactions + full feed tabs

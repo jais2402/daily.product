@@ -2,6 +2,21 @@
 
 Architecture decisions and session log. Newest entries first.
 
+## 2026-07-06 — Phase 4: auth + onboarding code complete
+
+Four reviewed tasks: identity generator (verbatim from original plan);
+Google auth core (designed login screen §1, OAuth server action, session
+refresh merged into the Next 16 proxy, callback with onboarding routing,
+POST-only signout — security review clean, no open-redirect); designed
+onboarding (§2–3: six role cards with monogram tiles, identity block with
+reshuffle, topic chips pre-selected by role; placed outside the shell like
+/login); auth-aware chrome + gate swap (sidebar user cell, topbar avatar,
+admin gate rebuilt as (gated) route-group layout checking dp_admin cookie OR
+session is_admin — fail-closed, live-verified; grant-admin script added).
+41/41 tests. Remaining: enable Google provider, live sign-in loop,
+grant:admin, deploy. Deferred notes in ledger (profile_topics transactionality,
+ssr setAll pattern awareness).
+
 ## 2026-07-06 — Hifi design pass on the public surface
 
 Jayasuriya delivered a complete design handoff (9 screens, tokens, interactive
