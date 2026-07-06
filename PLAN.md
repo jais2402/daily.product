@@ -99,9 +99,11 @@ Plan: docs/superpowers/plans/2026-07-06-phase-6-streaks-profile.md
 
 ## Phase 7 — Squads
 
-- [ ] Invite-code lib
-- [ ] Create/join squad flows
-- [ ] Squad feed + share-to-squad action
+Plan: docs/superpowers/plans/2026-07-06-phase-7-squads.md
+
+- [~] Squad libs (invite codes, slugs, article refs) + actions (create/join/share/leave, RLS choreography)
+- [~] Squads UI (§9: list, detail with shares+members, invite links, join confirm)
+- [~] Sidebar Squads nav live
 - [ ] Deployed
 
 ## Phase 8 — Recommendations + Launch polish
