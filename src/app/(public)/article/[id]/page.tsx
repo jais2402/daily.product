@@ -1,11 +1,94 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServerSupabase } from '@/lib/supabase/server';
+import { ShareButton } from './share-button';
 
 export const dynamic = 'force-dynamic';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Source glyph tile colors (design-handoff.md Design Tokens — "source
+// colors"). Duplicated from feed-card.tsx / rail.tsx — small,
+// presentation-only helpers; not worth promoting to a shared module for a
+// three-file design pass (see Task 1/2 precedent in rail.tsx).
+const SOURCE_COLORS = [
+  '#f6a723',
+  '#8b7cf8',
+  '#34d399',
+  '#ff7a59',
+  '#6ea8fe',
+  '#e879f9',
+  '#cbd5e1',
+  '#f472b6',
+];
+
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function sourceColor(sourceName: string | null): string {
+  const key = sourceName ?? 'unknown';
+  return SOURCE_COLORS[hashString(key) % SOURCE_COLORS.length];
+}
+
+function thumbnailGradient(seed: string): string {
+  const h1 = hashString(seed) % 360;
+  const h2 = (h1 + 40) % 360;
+  return `linear-gradient(135deg, hsl(${h1} 62% 46%), hsl(${h2} 58% 26%))`;
+}
+
+function formatRelativeDate(published_at: string | null): string | null {
+  if (!published_at) return null;
+  const date = new Date(published_at);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60_000);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) return 'now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 30) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+/** n = max(1, round(words(summary)/220)) — Global Constraints. */
+function estimateReadMinutes(summary: string | null): number | null {
+  if (!summary) return null;
+  const words = summary.trim().split(/\s+/).filter(Boolean).length;
+  if (words === 0) return null;
+  return Math.max(1, Math.round(words / 220));
+}
+
+function ChevronLeftIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+interface ArticleTopic {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface ArticleDetail {
   id: string;
@@ -16,7 +99,7 @@ interface ArticleDetail {
   author: string | null;
   published_at: string | null;
   source_name: string | null;
-  topics: { id: string; name: string; slug: string }[];
+  topics: ArticleTopic[];
 }
 
 interface RawDetailRow {
@@ -29,12 +112,14 @@ interface RawDetailRow {
   published_at: string | null;
   sources: { name: string } | { name: string }[] | null;
   article_topics:
-    | { topics: { id: string; name: string; slug: string } | { id: string; name: string; slug: string }[] | null }[]
+    | { topics: ArticleTopic | ArticleTopic[] | null }[]
     | null;
 }
 
-async function fetchArticle(id: string): Promise<ArticleDetail | null> {
-  const supabase = await createServerSupabase();
+async function fetchArticle(
+  supabase: Awaited<ReturnType<typeof createServerSupabase>>,
+  id: string,
+): Promise<ArticleDetail | null> {
   const { data, error } = await supabase
     .from('articles')
     .select(
@@ -68,14 +153,51 @@ async function fetchArticle(id: string): Promise<ArticleDetail | null> {
   };
 }
 
-function formatDate(published_at: string | null): string | null {
-  if (!published_at) return null;
-  const date = new Date(published_at);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+interface RelatedArticle {
+  id: string;
+  title: string;
+  source_name: string | null;
+  published_at: string | null;
+}
+
+interface RawRelatedRow {
+  id: string;
+  title: string;
+  published_at: string | null;
+  sources: { name: string } | { name: string }[] | null;
+}
+
+/**
+ * Up to 3 other approved articles sharing this article's first topic,
+ * newest first, excluding self. The inner-join filter embed is aliased to
+ * avoid the dual-embed PostgREST pitfall documented in
+ * src/lib/feed/queries.ts (fetchFeedPage) — a second `article_topics`
+ * embed here (even unaliased) would collide if we ever add one.
+ */
+async function fetchRelated(
+  supabase: Awaited<ReturnType<typeof createServerSupabase>>,
+  topicId: string,
+  excludeId: string,
+): Promise<RelatedArticle[]> {
+  const { data, error } = await supabase
+    .from('articles')
+    .select('id,title,published_at,sources(name),filter_topic:article_topics!inner(topic_id)')
+    .eq('status', 'approved')
+    .eq('filter_topic.topic_id', topicId)
+    .neq('id', excludeId)
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .limit(3);
+
+  if (error) throw new Error(error.message);
+
+  return ((data ?? []) as unknown as RawRelatedRow[]).map((row) => {
+    const source = Array.isArray(row.sources) ? row.sources[0] : row.sources;
+    return {
+      id: row.id,
+      title: row.title,
+      published_at: row.published_at,
+      source_name: source?.name ?? null,
+    };
   });
 }
 
@@ -87,68 +209,143 @@ export default async function ArticlePage({
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
 
-  const article = await fetchArticle(id);
+  const supabase = await createServerSupabase();
+  const article = await fetchArticle(supabase, id);
   if (!article) notFound();
 
-  const date = formatDate(article.published_at);
+  const date = formatRelativeDate(article.published_at);
+  const readMin = estimateReadMinutes(article.summary);
+  const firstTopic = article.topics[0] ?? null;
+  const glyph = (article.source_name ?? '?').charAt(0).toUpperCase();
+
+  const related = firstTopic
+    ? await fetchRelated(supabase, firstTopic.id, article.id)
+    : [];
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-6">
-      <Link href="/" className="text-sm text-neutral-500 hover:underline">
-        ← Back to feed
+    <div className="mx-auto w-full max-w-[760px] px-7 pb-20 pt-[26px]">
+      <Link
+        href="/"
+        className="mb-[22px] inline-flex items-center gap-1.5 text-[13.5px] text-muted hover:text-text"
+      >
+        <ChevronLeftIcon /> Back to feed
       </Link>
 
-      {article.topics.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {article.topics.map((topic) => (
-            <Link
-              key={topic.id}
-              href={`/?topic=${topic.slug}`}
-              className="rounded-full border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
-            >
-              {topic.name}
-            </Link>
-          ))}
+      <div className="mb-4 flex items-center gap-[9px]">
+        <span
+          className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] text-[11px] font-bold text-[#0d1016]"
+          style={{ backgroundColor: sourceColor(article.source_name) }}
+        >
+          {glyph}
+        </span>
+        <span className="text-[13.5px] font-semibold text-muted">
+          {article.source_name ?? 'Unknown source'}
+        </span>
+        {date && (
+          <>
+            <span className="text-faint">·</span>
+            <span className="text-[13px] text-faint">{date}</span>
+          </>
+        )}
+      </div>
+
+      {firstTopic && (
+        <span
+          className="mb-3.5 inline-block rounded-lg px-3 py-1 text-[12px] font-semibold text-acc"
+          style={{ backgroundColor: 'rgba(139,124,248,.14)' }}
+        >
+          {firstTopic.name}
+        </span>
+      )}
+
+      <h1 className="mb-[18px] font-display text-[32px] font-bold leading-[1.2] tracking-[-0.02em] text-text">
+        {article.title}
+      </h1>
+
+      {readMin !== null && (
+        <div className="mb-[22px] flex items-center gap-1.5 text-[13px] text-faint">
+          <ClockIcon />
+          <span>{readMin} min read</span>
         </div>
       )}
 
-      <h1 className="text-3xl font-bold">{article.title}</h1>
-
-      <p className="text-sm text-neutral-500">
-        {article.source_name ?? 'Unknown source'}
-        {article.author ? ` · ${article.author}` : ''}
-        {date ? ` · ${date}` : ''}
-      </p>
-
-      {article.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={article.image_url}
-          alt=""
-          className="w-full rounded-lg object-cover"
-        />
-      ) : (
-        <div className="h-48 w-full rounded-lg bg-neutral-200 dark:bg-neutral-800" />
-      )}
+      <div className="mb-[26px] h-[220px] overflow-hidden rounded-[14px]">
+        {article.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={article.image_url}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div
+            className="h-full w-full"
+            style={{ background: thumbnailGradient(firstTopic?.slug ?? article.id) }}
+          />
+        )}
+      </div>
 
       {article.summary && (
-        <p className="text-base text-neutral-700 dark:text-neutral-300">
-          {article.summary}
-        </p>
+        <div className="mb-[26px] rounded-r-xl border-l-[3px] border-acc bg-card p-4">
+          <div className="mb-[7px] text-[11.5px] font-semibold uppercase tracking-[.08em] text-acc">
+            TL;DR
+          </div>
+          <p className="text-[16px] leading-[1.72] text-[#cdd6df]">
+            {article.summary}
+          </p>
+        </div>
       )}
 
-      <a
-        href={article.url}
-        target="_blank"
-        rel="noreferrer"
-        className="inline-block w-fit rounded-lg bg-neutral-900 px-5 py-3 text-sm font-semibold text-white dark:bg-white dark:text-neutral-900"
-      >
-        Read the full article ↗
-      </a>
+      <div className="my-6 flex items-center gap-3 border-y border-border py-3">
+        <ShareButton title={article.title} url={article.url} />
+        <a
+          href={article.url}
+          target="_blank"
+          rel="noreferrer"
+          className="ml-auto flex items-center gap-[7px] rounded-[11px] bg-acc px-5 py-2.5 font-display text-[13.5px] font-semibold text-[#0d1016]"
+        >
+          Read full article ↗
+        </a>
+      </div>
 
-      <Link href="/" className="text-sm text-neutral-500 hover:underline">
-        ← Back to feed
-      </Link>
-    </main>
+      {related.length > 0 && (
+        <>
+          <h2 className="mb-4 font-display text-[19px] font-bold text-text">
+            You might also like
+          </h2>
+          <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((rec) => {
+              const recDate = formatRelativeDate(rec.published_at);
+              const recGlyph = (rec.source_name ?? '?').charAt(0).toUpperCase();
+              return (
+                <Link
+                  key={rec.id}
+                  href={`/article/${rec.id}`}
+                  className="flex flex-col gap-2 rounded-[14px] border border-border bg-card p-3.5 hover:border-acc"
+                >
+                  <div className="flex items-start gap-2.5">
+                    <span
+                      className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-[6px] text-[11px] font-bold text-[#0d1016]"
+                      style={{ backgroundColor: sourceColor(rec.source_name) }}
+                    >
+                      {recGlyph}
+                    </span>
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <h4 className="line-clamp-2 text-[13.5px] font-medium leading-[1.35] text-text">
+                        {rec.title}
+                      </h4>
+                      <span className="text-[12px] text-faint">
+                        {rec.source_name ?? 'Unknown source'}
+                        {recDate ? ` · ${recDate}` : ''}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
   );
 }
