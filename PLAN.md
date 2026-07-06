@@ -79,10 +79,12 @@ Plan: docs/superpowers/plans/2026-07-06-phase-4-auth-onboarding.md
 
 ## Phase 5 — Interactions + full feed tabs
 
-- [ ] Bookmarks (toggle + page)
-- [ ] Upvotes (toggle + cached count)
-- [ ] Read logging on CTA
-- [ ] Hot News / Most Read / Liked tabs
+Plan: docs/superpowers/plans/2026-07-06-phase-5-interactions.md
+
+- [~] Bookmarks (toggle + §7 page + live nav)
+- [~] Upvotes (optimistic toggle + cached count)
+- [~] Read logging on CTA
+- [~] New / Hot / Most Read / Top tabs (design semantics; ranked pagination disjoint across pages)
 - [ ] Deployed
 
 ## Phase 6 — Streaks + Profile
