@@ -108,8 +108,9 @@ Plan: docs/superpowers/plans/2026-07-06-design-pass-public-surface.md · Spec: d
 ## Blocked on Jayasuriya
 
 - [x] New Supabase project (ref: fmalrqiigbhpfmgmlyxo)
-- [ ] Supabase MCP authenticated (`/mcp` in a terminal at ~/Documents/daily-product)
-- [ ] `.env.local` keys (URL + anon + service role)
-- [ ] Starting list of ~10–15 RSS sources
-- [ ] Vercel project + domain decision
+- [x] Supabase MCP authenticated + migrations 001–004 applied (2026-07-04)
+- [x] `.env.local` keys (all 5 set + verified)
+- [x] Source list confirmed (30 feeds; 2 paused — RSS discontinued upstream)
+- [ ] Migration 005 applied (sources public read — 3-line SQL, fixes source names on feed)
+- [ ] Vercel project + domain decision (then merge PR #1 and deploy)
 - [ ] Google OAuth provider (not needed until Phase 4)
