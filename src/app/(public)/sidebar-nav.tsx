@@ -56,9 +56,9 @@ const NAV_ITEM_BASE =
 const ACTIVE_STYLE = { backgroundColor: 'rgba(139,124,248,.12)' };
 
 /**
- * Sidebar nav rows. Home and Bookmarks are live routes with active styling
- * on exact pathname match (violet tint + text-acc + font-semibold);
- * Squads and Profile remain disabled placeholder rows with a "Soon" tag.
+ * Sidebar nav rows. Home, Bookmarks, and Profile are live routes with active
+ * styling on exact pathname match (violet tint + text-acc + font-semibold);
+ * Squads remains a disabled placeholder row with a "Soon" tag.
  * Client component (usePathname) so the rest of the sidebar can stay
  * server-rendered.
  */
@@ -94,11 +94,18 @@ export function SidebarNav() {
         <span>Squads</span>
         <SoonTag />
       </div>
-      <div className={`${NAV_ITEM_BASE} cursor-default text-muted`}>
+      <Link
+        href="/profile"
+        className={`${NAV_ITEM_BASE} ${
+          pathname === '/profile'
+            ? 'font-semibold text-acc'
+            : 'text-muted hover:bg-card hover:text-text'
+        }`}
+        style={pathname === '/profile' ? ACTIVE_STYLE : undefined}
+      >
         <UserIcon />
         <span>Profile</span>
-        <SoonTag />
-      </div>
+      </Link>
     </>
   );
 }

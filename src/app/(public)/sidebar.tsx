@@ -119,29 +119,35 @@ export async function Sidebar() {
 
       {user ? (
         <div className="mt-auto flex items-center gap-2.5 rounded-[10px] px-2 py-2">
-          {avatarSeed ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl(avatarSeed)}
-              alt=""
-              className="h-[34px] w-[34px] shrink-0 rounded-full border border-border"
-            />
-          ) : (
-            <div
-              className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full font-display text-[13px] font-bold text-bg"
-              style={{ background: 'linear-gradient(140deg, #8b7cf8, #6ea8fe)' }}
-            >
-              {displayName?.[0]?.toUpperCase() ?? '?'}
+          {/* Sign-out is a form and can't nest inside the <Link> (nested
+              interactive/form content is invalid HTML), so the link wraps
+              only the avatar + name/role, and the sign-out button sits
+              outside it in the same row. */}
+          <Link href="/profile" className="flex min-w-0 flex-1 items-center gap-2.5">
+            {avatarSeed ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl(avatarSeed)}
+                alt=""
+                className="h-[34px] w-[34px] shrink-0 rounded-full border border-border"
+              />
+            ) : (
+              <div
+                className="grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full font-display text-[13px] font-bold text-bg"
+                style={{ background: 'linear-gradient(140deg, #8b7cf8, #6ea8fe)' }}
+              >
+                {displayName?.[0]?.toUpperCase() ?? '?'}
+              </div>
+            )}
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-[13.5px] font-semibold text-text">
+                {displayName}
+              </span>
+              <span className="truncate text-[11.5px] text-muted">
+                {roleLabel(role)}
+              </span>
             </div>
-          )}
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13.5px] font-semibold text-text">
-              {displayName}
-            </span>
-            <span className="truncate text-[11.5px] text-muted">
-              {roleLabel(role)}
-            </span>
-          </div>
+          </Link>
           <form action="/auth/signout" method="post">
             <button
               type="submit"

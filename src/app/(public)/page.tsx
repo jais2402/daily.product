@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { parseFeedParams, type FeedTab } from '@/lib/feed/params';
 import { fetchFeedPage, fetchTopicsWithCounts } from '@/lib/feed/queries';
+import { currentStreak } from '@/lib/streaks';
 import { FeedCard } from './feed-card';
-import { Rail } from './rail';
+import { Rail, type StreakInfo } from './rail';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,35 @@ export default async function Home({
     data: { user },
   } = await supabase.auth.getUser();
   const signedIn = Boolean(user);
+
+  // Rail streak card (design-handoff.md §5 card 1) is signed-in only. Rail is
+  // a server component but is only ever rendered from this page, so we fetch
+  // the user's read dates here (page.tsx already knows the user) and pass a
+  // `streak` prop down rather than have Rail re-derive auth itself.
+  let streak: StreakInfo | null = null;
+  if (user) {
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: readRows } = await supabase
+      .from('reads')
+      .select('read_date')
+      .eq('user_id', user.id)
+      .order('read_date', { ascending: false })
+      .limit(60);
+    const readDates = (readRows ?? []).map((row) => row.read_date as string);
+    const days = currentStreak(readDates, today);
+    const readToday = readDates.includes(today);
+
+    const last7 = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today + 'T00:00:00Z');
+      d.setUTCDate(d.getUTCDate() - (6 - i));
+      return d.toISOString().slice(0, 10);
+    });
+    const countsByDate = new Map<string, number>();
+    for (const d of readDates) countsByDate.set(d, (countsByDate.get(d) ?? 0) + 1);
+    const last7Counts = last7.map((d) => countsByDate.get(d) ?? 0);
+
+    streak = { days, readToday, last7Counts };
+  }
 
   let bookmarkedIds = new Set<string>();
   let upvotedIds = new Set<string>();
@@ -184,7 +214,7 @@ export default async function Home({
         )}
       </div>
 
-      <Rail supabase={supabase} topics={topics} />
+      <Rail supabase={supabase} topics={topics} streak={streak} />
     </main>
   );
 }

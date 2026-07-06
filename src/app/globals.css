@@ -42,3 +42,22 @@ body {
   color: var(--text);
   font-family: var(--font-body), system-ui, sans-serif;
 }
+
+/*
+ * Streak pill flame pulse (design-handoff.md §4 topbar streak pill) — the
+ * design's only animation. Gentle opacity breathing on the flame icon only,
+ * never on the count text or the pill chrome.
+ */
+@keyframes streak-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.animate-streak-pulse {
+  animation: streak-pulse 2.4s ease-in-out infinite;
+}
