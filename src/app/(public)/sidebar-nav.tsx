@@ -42,25 +42,18 @@ function UserIcon() {
   );
 }
 
-function SoonTag() {
-  return (
-    <span className="ml-auto rounded-md border border-border bg-card px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-faint">
-      Soon
-    </span>
-  );
-}
-
 const NAV_ITEM_BASE =
   'flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14px] transition-colors';
 
 const ACTIVE_STYLE = { backgroundColor: 'rgba(139,124,248,.12)' };
 
 /**
- * Sidebar nav rows. Home, Bookmarks, and Profile are live routes with active
- * styling on exact pathname match (violet tint + text-acc + font-semibold);
- * Squads remains a disabled placeholder row with a "Soon" tag.
- * Client component (usePathname) so the rest of the sidebar can stay
- * server-rendered.
+ * Sidebar nav rows. Home, Bookmarks, Squads, and Profile are live routes
+ * with active styling (violet tint + text-acc + font-semibold); Home and
+ * Profile use exact pathname match, Squads uses a prefix match so its
+ * detail/join sub-routes stay highlighted too. Add-a-source remains the
+ * only disabled placeholder row with a "Soon" tag. Client component
+ * (usePathname) so the rest of the sidebar can stay server-rendered.
  */
 export function SidebarNav() {
   const pathname = usePathname();
@@ -89,11 +82,18 @@ export function SidebarNav() {
         <BookmarkIcon />
         <span>Bookmarks</span>
       </Link>
-      <div className={`${NAV_ITEM_BASE} cursor-default text-muted`}>
+      <Link
+        href="/squads"
+        className={`${NAV_ITEM_BASE} ${
+          pathname.startsWith('/squads')
+            ? 'font-semibold text-acc'
+            : 'text-muted hover:bg-card hover:text-text'
+        }`}
+        style={pathname.startsWith('/squads') ? ACTIVE_STYLE : undefined}
+      >
         <UsersIcon />
         <span>Squads</span>
-        <SoonTag />
-      </div>
+      </Link>
       <Link
         href="/profile"
         className={`${NAV_ITEM_BASE} ${
