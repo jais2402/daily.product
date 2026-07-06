@@ -1,6 +1,9 @@
 // 12-bar weekly reading chart (design-handoff.md §8 "Reading hours · last 12
-// weeks", relabeled per the Phase 6 plan's honest-data deviation — see
-// page.tsx — to "Articles read" counts rather than fabricated hours).
+// weeks", relabeled per the Phase 6 plan's honest-data deviation to
+// "Articles read" counts rather than fabricated hours). `counts` is raw
+// weekly article-read events from `weeklyCounts()` (see page.tsx), so the
+// "N articles read" label/tooltip below is accurate, not a distinct-days
+// proxy.
 export function WeeklyChart({ counts }: { counts: number[] }) {
   const max = Math.max(1, ...counts);
   const lastIndex = counts.length - 1;

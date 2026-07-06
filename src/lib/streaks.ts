@@ -121,23 +121,29 @@ export function activityGrid(
 
 /**
  * Weekly bucket counts, oldest -> newest, aligned to Sun..Sat weeks with the
- * week containing `today` as the last bucket. Each bucket counts DISTINCT
- * read-days that week (not raw read events) — this stays consistent with
- * the streak semantics above ("did you read on N days") rather than
- * "articles read," which is a separate, honestly-labeled stat elsewhere.
+ * week containing `today` as the last bucket. By default each bucket counts
+ * RAW read events for that week — every entry in `readDates` counts, so a
+ * duplicate (e.g. the same article read on the same day producing two rows
+ * upstream, or simply multiple articles/read-events per day) is counted
+ * individually. This is what powers an honest "articles read per week"
+ * chart. Pass `{ distinctDays: true }` to restore the older semantics of
+ * counting distinct read-days per week (consistent with the streak
+ * semantics above: "did you read on N days"), independent of how many
+ * reads happened on each of those days.
  */
 export function weeklyCounts(
   readDates: string[],
   today: string,
   weeks = 12,
+  opts?: { distinctDays?: boolean },
 ): number[] {
-  const distinctDays = new Set(readDates);
+  const dates = opts?.distinctDays ? Array.from(new Set(readDates)) : readDates;
 
   const lastWeekStart = weekStart(today);
   const firstWeekStart = addDays(lastWeekStart, -7 * (weeks - 1));
 
   const buckets = new Array<number>(weeks).fill(0);
-  for (const date of distinctDays) {
+  for (const date of dates) {
     const offsetDays = diffDays(firstWeekStart, date);
     if (offsetDays < 0) continue;
     const weekIndex = Math.floor(offsetDays / 7);

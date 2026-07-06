@@ -81,6 +81,14 @@ export default async function ProfilePage() {
   const role: MemberRole = profile?.role ?? 'other';
   const joined = profile?.created_at ? formatJoined(profile.created_at) : null;
 
+  // `reads` has PK (user_id, article_id, read_date), so each row is one
+  // article read on one day — i.e. an article-read event. `readDates` is
+  // therefore a raw list of read events (not deduped), and `weeklyCounts`'s
+  // default mode sums those events per week to produce a true "articles
+  // read per week" chart. Note: the same article read on two different
+  // days produces two rows and counts twice here — that's intentional and
+  // matches the "Articles read" stat below, which also counts `reads` rows
+  // directly (not distinct articles).
   const readDates = (readRows ?? []).map((row) => row.read_date as string);
   const streak = currentStreak(readDates, today);
   const weeks = activityGrid(readDates, today);

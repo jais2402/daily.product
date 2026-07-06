@@ -156,23 +156,62 @@ describe('weeklyCounts', () => {
     expect(weeklyCounts([], TODAY, 3)).toEqual([0, 0, 0]);
   });
 
-  it('counts distinct read-days per week, with the last bucket being the week containing today', () => {
+  it('counts distinct read-days per week when {distinctDays: true}, with the last bucket being the week containing today', () => {
     // TODAY = 2026-07-06 (Mon); that week's Sunday is 2026-07-05.
     const counts = weeklyCounts(
       ['2026-07-05', '2026-07-06', '2026-07-06'],
       TODAY,
       2,
+      { distinctDays: true },
     );
     // duplicates on 07-06 collapse to 1 distinct day; plus 07-05 = 2 distinct days
     expect(counts[counts.length - 1]).toBe(2);
   });
 
-  it('places a Sunday read in the new week, not the prior week', () => {
+  it('places a Sunday read in the new week, not the prior week (distinctDays mode)', () => {
     // Week containing TODAY (Mon 2026-07-06) starts Sunday 2026-07-05.
     // A read on that Sunday belongs to the new week; a read on the
     // previous Saturday (2026-07-04) belongs to the prior week.
+    const counts = weeklyCounts(['2026-07-04', '2026-07-05'], TODAY, 2, {
+      distinctDays: true,
+    });
+    expect(counts[0]).toBe(1); // prior week: 07-04
+    expect(counts[1]).toBe(1); // week of today: 07-05
+  });
+
+  it('places a Sunday read in the new week, not the prior week (raw/default mode)', () => {
     const counts = weeklyCounts(['2026-07-04', '2026-07-05'], TODAY, 2);
     expect(counts[0]).toBe(1); // prior week: 07-04
     expect(counts[1]).toBe(1); // week of today: 07-05
+  });
+
+  it('defaults to raw counts: each read event counts, duplicates included', () => {
+    // 3 reads on the same day (today's week) should yield 3, not 1.
+    const counts = weeklyCounts(
+      ['2026-07-06', '2026-07-06', '2026-07-06'],
+      TODAY,
+      2,
+    );
+    expect(counts[counts.length - 1]).toBe(3);
+  });
+
+  it('raw mode sums duplicates across distinct days within a week', () => {
+    // 07-05 read twice, 07-06 read once -> 3 raw events in the last week.
+    const counts = weeklyCounts(
+      ['2026-07-05', '2026-07-05', '2026-07-06'],
+      TODAY,
+      2,
+    );
+    expect(counts[counts.length - 1]).toBe(3);
+  });
+
+  it('{distinctDays: true} collapses the same duplicates to 1 per day (2 distinct days)', () => {
+    const counts = weeklyCounts(
+      ['2026-07-05', '2026-07-05', '2026-07-06'],
+      TODAY,
+      2,
+      { distinctDays: true },
+    );
+    expect(counts[counts.length - 1]).toBe(2);
   });
 });
