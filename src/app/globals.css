@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/*
+ * Daily.Product design tokens (docs/design/design-handoff.md — Design
+ * Tokens section). This pass is dark-first: the palette is unconditional,
+ * there is no light-mode media split.
+ */
+:root {
+  --bg: #0d1016;
+  --panel: #12161d;
+  --card: #161b22;
+  --card2: #1a2029;
+  --border: #232b35;
+  --text: #e7edf3;
+  --muted: #9aa6b2;
+  --faint: #6b7683;
+  --acc: #8b7cf8;
+  --amber: #f6a723;
+  --green: #34d399;
+  --blue: #6ea8fe;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-card: var(--card);
+  --color-card2: var(--card2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-acc: var(--acc);
+  --color-amber: var(--amber);
+  --color-green: var(--green);
+  --color-blue: var(--blue);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/*
+ * Streak pill flame pulse (design-handoff.md §4 topbar streak pill) — the
+ * design's only animation. Gentle opacity breathing on the flame icon only,
+ * never on the count text or the pill chrome.
+ */
+@keyframes streak-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.animate-streak-pulse {
+  animation: streak-pulse 2.4s ease-in-out infinite;
+}
+
+/*
+ * Accessibility pass (phase 8 task 2): visible keyboard focus ring on every
+ * interactive element, including inputs that use Tailwind's `outline-none`
+ * (login/onboarding/profile/squads text fields — those only remove the
+ * default focus ring so the `focus:border-acc` treatment reads cleanly, not
+ * to suppress focus visibility). `!important` is required here because
+ * Tailwind's utility layer is injected after this stylesheet and
+ * `.outline-none` (outline-style: none) would otherwise win the cascade at
+ * equal specificity and silently swallow the ring on those fields.
+ */
+:focus-visible {
+  outline: 2px solid var(--acc) !important;
+  outline-offset: 2px !important;
+}

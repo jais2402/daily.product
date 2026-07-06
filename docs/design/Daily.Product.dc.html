@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #0d1016; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #2a323d; border-radius: 8px; border: 2px solid #0d1016; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  input::placeholder { color: #5b6672; }
+  @keyframes dppulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',system-ui,sans-serif;--bg:#0d1016;--panel:#12161d;--card:#161b22;--card2:#1a2029;--border:#232b35;--text:#e7edf3;--muted:#9aa6b2;--faint:#6b7683;--amber:#f6a723;--green:#34d399;--acc: {{ accent }};" ref="{{ setRoot }}">
+
+  <!-- ================= ONBOARDING ================= -->
+  <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;background:radial-gradient(1100px 600px at 50% -10%, rgba(139,124,248,.14), transparent 60%), var(--bg);">
+
+    <!-- Step: Login -->
+    <sc-if value="{{ isLoginStep }}" hint-placeholder-val="{{ true }}">
+    <div style="width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;">
+      <div style="display:flex;align-items:center;gap:11px;">
+        <div style="width:40px;height:40px;border-radius:11px;background:linear-gradient(140deg,var(--acc),#6ea8fe);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:20px;color:#0d1016;">D</div>
+        <span style="font-family:'Space Grotesk';font-weight:700;font-size:22px;letter-spacing:-.02em;">Daily<span style="color:var(--acc);">.Product</span></span>
+      </div>
+      <div>
+        <h1 style="font-family:'Space Grotesk';font-size:30px;line-height:1.15;font-weight:700;margin:0 0 12px;letter-spacing:-.02em;">Your morning brew of<br>product knowledge</h1>
+        <p style="font-size:15px;line-height:1.55;color:var(--muted);margin:0;">The daily home for product minds — curated content, tools, and community, all in one feed.</p>
+      </div>
+      <div style="width:100%;display:flex;flex-direction:column;gap:12px;margin-top:6px;">
+        <button onClick="{{ googleLogin }}" style="display:flex;align-items:center;justify-content:center;gap:11px;width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#1a1a1a;font-family:'IBM Plex Sans';font-size:15px;font-weight:600;cursor:pointer;transition:transform .12s;" style-hover="transform:translateY(-1px)">
+          <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.6 12.2c0-.7-.1-1.4-.2-2H12v3.9h6c-.3 1.4-1.1 2.6-2.3 3.4v2.8h3.7c2.2-2 3.4-5 3.4-8.1z"/><path fill="#34A853" d="M12 23c3.1 0 5.7-1 7.6-2.8l-3.7-2.8c-1 .7-2.3 1.1-3.9 1.1-3 0-5.5-2-6.4-4.8H1.8v3C3.7 20.5 7.5 23 12 23z"/><path fill="#FBBC05" d="M5.6 13.7c-.2-.7-.4-1.4-.4-2.2s.1-1.5.4-2.2v-3H1.8C1 7.9.6 9.9.6 12s.4 4.1 1.2 5.7l3.8-3z"/><path fill="#EA4335" d="M12 5.8c1.7 0 3.2.6 4.4 1.7l3.3-3.3C17.7 2.3 15.1 1 12 1 7.5 1 3.7 3.5 1.8 7l3.8 3c.9-2.8 3.4-4.8 6.4-4.8z"/></svg>
+          Continue with Google
+        </button>
+        <button onClick="{{ googleLogin }}" style="display:flex;align-items:center;justify-content:center;gap:11px;width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:#000;color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:transform .12s;" style-hover="transform:translateY(-1px)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 12.5c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.6 2.3 2.8 2.3 1.1 0 1.6-.7 2.9-.7s1.8.7 3 .7 2-1.1 2.7-2.2c.9-1.2 1.2-2.5 1.2-2.5-.1 0-2.3-.9-2.3-3.4zm-2.3-6.3c.6-.8 1-1.8.9-2.9-.9 0-2 .6-2.6 1.3-.6.7-1.1 1.7-.9 2.7 1 .1 2-.4 2.6-1.1z"/></svg>
+          Continue with Apple
+        </button>
+      </div>
+      <p style="font-size:12px;color:var(--faint);margin:0;line-height:1.5;">By continuing you agree to our Terms & Privacy Policy.</p>
+    </div>
+    </sc-if>
+
+    <!-- Step: Role -->
+    <sc-if value="{{ isRoleStep }}" hint-placeholder-val="{{ true }}">
+    <div style="width:100%;max-width:680px;display:flex;flex-direction:column;gap:24px;">
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;">
+        <span style="font-size:12.5px;font-weight:600;color:var(--acc);letter-spacing:.08em;text-transform:uppercase;">Step 1 of 2</span>
+        <h1 style="font-family:'Space Grotesk';font-size:27px;font-weight:700;margin:0;letter-spacing:-.02em;">What best describes you?</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0;">We'll tailor your feed and topics to your role.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+        <sc-for list="{{ roles }}" as="role" hint-placeholder-count="6">
+          <button data-role="{{ role.id }}" onClick="{{ selectRole }}" style="{{ role.cardStyle }}">
+            <span style="{{ role.monoStyle }}">{{ role.mono }}</span>
+            <span style="font-family:'Space Grotesk';font-size:15px;font-weight:600;color:var(--text);">{{ role.label }}</span>
+            <span style="font-size:12px;color:var(--muted);line-height:1.4;">{{ role.desc }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display:flex;justify-content:center;">
+        <button onClick="{{ continueToTopics }}" style="padding:13px 40px;border-radius:11px;border:none;background:var(--acc);color:#0d1016;font-family:'Space Grotesk';font-weight:600;font-size:15px;cursor:pointer;transition:transform .12s;" style-hover="transform:translateY(-1px)">Continue</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- Step: Topics -->
+    <sc-if value="{{ isTopicStep }}" hint-placeholder-val="{{ true }}">
+    <div style="width:100%;max-width:640px;display:flex;flex-direction:column;gap:22px;">
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:center;">
+        <span style="font-size:12.5px;font-weight:600;color:var(--acc);letter-spacing:.08em;text-transform:uppercase;">Step 2 of 2</span>
+        <h1 style="font-family:'Space Grotesk';font-size:27px;font-weight:700;margin:0;letter-spacing:-.02em;">Pick your topics</h1>
+        <p style="font-size:14.5px;color:var(--muted);margin:0;">Choose at least 3. You can change these anytime.</p>
+      </div>
+      <div style="position:relative;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--faint);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <input placeholder="Search topics, sources, creators…" style="width:100%;padding:13px 14px 13px 40px;border-radius:11px;border:1px solid var(--border);background:var(--panel);color:var(--text);font-family:'IBM Plex Sans';font-size:14px;outline:none;">
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
+        <sc-for list="{{ topics }}" as="topic" hint-placeholder-count="14">
+          <button data-topic="{{ topic.name }}" onClick="{{ toggleTopic }}" style="{{ topic.chipStyle }}">{{ topic.name }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:16px;margin-top:4px;">
+        <button onClick="{{ backToRole }}" style="padding:13px 22px;border-radius:11px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;">Back</button>
+        <button onClick="{{ finishOnboarding }}" style="padding:13px 40px;border-radius:11px;border:none;background:var(--acc);color:#0d1016;font-family:'Space Grotesk';font-weight:600;font-size:15px;cursor:pointer;transition:transform .12s;" style-hover="transform:translateY(-1px)">Enter Daily.Product</button>
+      </div>
+    </div>
+    </sc-if>
+
+  </div>
+  </sc-if>
+
+  <!-- ================= APP SHELL ================= -->
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;min-height:100vh;">
+
+    <!-- SIDEBAR -->
+    <aside style="width:248px;flex-shrink:0;height:100vh;position:sticky;top:0;border-right:1px solid var(--border);background:var(--panel);display:flex;flex-direction:column;padding:20px 14px;gap:6px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 8px 14px;">
+        <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(140deg,var(--acc),#6ea8fe);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:16px;color:#0d1016;">D</div>
+        <span style="font-family:'Space Grotesk';font-weight:700;font-size:17px;letter-spacing:-.02em;">Daily<span style="color:var(--acc);">.Product</span></span>
+      </div>
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="4">
+        <button data-screen="{{ item.id }}" onClick="{{ nav }}" style="{{ item.style }}">
+          <span style="display:flex;" ref="{{ item.iconRef }}"></span>
+          <span>{{ item.label }}</span>
+        </button>
+      </sc-for>
+      <div style="height:1px;background:var(--border);margin:10px 4px;"></div>
+      <span style="font-size:11px;font-weight:600;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;padding:2px 10px 6px;">Your topics</span>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;padding:0 8px;">
+        <sc-for list="{{ myTopics }}" as="t" hint-placeholder-count="5">
+          <span style="padding:5px 10px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);">{{ t }}</span>
+        </sc-for>
+      </div>
+      <button style="margin:12px 8px 0;display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add a source
+      </button>
+      <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:11px;cursor:pointer;" onClick="{{ gotoProfile }}" style-hover="background:var(--card)">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(140deg,#8b7cf8,#f6a723);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#0d1016;flex-shrink:0;">JV</div>
+        <div style="display:flex;flex-direction:column;overflow:hidden;">
+          <span style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Jayasuriya V</span>
+          <span style="font-size:11.5px;color:var(--faint);">{{ roleLabel }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main style="flex:1;height:100vh;overflow-y:auto;" ref="{{ setMainRef }}">
+
+      <!-- Top bar -->
+      <div style="position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);background:rgba(13,16,22,.82);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:18px;">
+        <div style="position:relative;flex:1;max-width:440px;">
+          <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--faint);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <input placeholder="Search articles, tags, sources…" style="width:100%;padding:10px 14px 10px 38px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:'IBM Plex Sans';font-size:13.5px;outline:none;">
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+          <div style="display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);">
+            <span style="color:var(--amber);display:flex;animation:dppulse 2.4s ease-in-out infinite;"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c1 3 4 4 4 8a4 4 0 0 1-8 0c0-1 .5-2 1-2.5C9.5 10.5 12 8 12 3Z"/></svg></span>
+            <span style="font-size:13px;font-weight:600;">24</span>
+          </div>
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(140deg,#8b7cf8,#f6a723);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#0d1016;cursor:pointer;" onClick="{{ gotoProfile }}">JV</div>
+        </div>
+      </div>
+
+      <!-- ---------- HOME ---------- -->
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:26px;padding:26px 28px 60px;max-width:1440px;margin:0 auto;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+            <h1 style="font-family:'Space Grotesk';font-size:23px;font-weight:700;margin:0;letter-spacing:-.02em;">Good morning, Jaya 👋</h1>
+            <div style="display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:4px;">
+              <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="4">
+                <button data-tab="{{ tab.id }}" onClick="{{ setTab }}" style="{{ tab.style }}">{{ tab.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid;gap:18px;{{ gridStyle }}">
+            <sc-for list="{{ feed }}" as="article" hint-placeholder-count="6">
+              <article data-id="{{ article.id }}" onClick="{{ openArticle }}" style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .16s,transform .16s;" style-hover="border-color:var(--acc);transform:translateY(-3px)">
+                <sc-if value="{{ showThumbs }}" hint-placeholder-val="{{ true }}">
+                  <div style="{{ article.thumbStyle }}">
+                    <span style="padding:4px 10px;border-radius:7px;background:rgba(13,16,22,.6);backdrop-filter:blur(4px);font-size:11px;font-weight:600;color:#fff;">{{ article.tag }}</span>
+                  </div>
+                </sc-if>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:9px;flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="{{ article.sourceStyle }}">{{ article.glyph }}</span>
+                    <span style="font-size:12.5px;color:var(--muted);">{{ article.source }}</span>
+                    <span style="font-size:12px;color:var(--faint);margin-left:auto;">{{ article.date }}</span>
+                  </div>
+                  <h3 style="font-family:'Space Grotesk';font-size:16.5px;line-height:1.32;font-weight:600;margin:0;color:var(--text);">{{ article.title }}</h3>
+                  <p style="font-size:12.8px;line-height:1.5;color:var(--muted);margin:0;flex:1;">{{ article.summary }}</p>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:6px;color:var(--faint);font-size:12.5px;">
+                    <span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ article.readMin }}m</span>
+                    <button data-id="{{ article.id }}" onClick="{{ toggleUpvote }}" style="{{ article.upStyle }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>{{ article.voteCount }}</button>
+                    <span style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-11.9 7.8L3 21l1.7-6.1A8.5 8.5 0 1 1 21 11.5Z"/></svg>{{ article.comments }}</span>
+                    <button data-id="{{ article.id }}" onClick="{{ toggleBookmark }}" style="{{ article.bmStyle }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="{{ article.bmFill }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></button>
+                  </div>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- RIGHT RAIL (recommendations) -->
+        <aside style="width:296px;flex-shrink:0;display:flex;flex-direction:column;gap:18px;">
+          <div style="background:linear-gradient(150deg,rgba(139,124,248,.16),rgba(246,167,35,.10));border:1px solid var(--border);border-radius:16px;padding:18px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="color:var(--amber);display:flex;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c1 3 4 4 4 8a4 4 0 0 1-8 0c0-1 .5-2 1-2.5C9.5 10.5 12 8 12 3Z"/></svg></span>
+              <span style="font-family:'Space Grotesk';font-weight:700;font-size:15px;">24-day streak</span>
+            </div>
+            <p style="font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45;">Read 1 more article today to keep it alive.</p>
+            <div style="display:flex;gap:4px;">
+              <sc-for list="{{ miniStreak }}" as="d" hint-placeholder-count="7">
+                <div style="{{ d.style }}"></div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;">
+              <span style="color:var(--acc);display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg></span>
+              <span style="font-family:'Space Grotesk';font-weight:600;font-size:14.5px;">Top sources for you</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ topSources }}" as="src" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="{{ src.style }}">{{ src.glyph }}</span>
+                  <div style="display:flex;flex-direction:column;min-width:0;">
+                    <span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ src.name }}</span>
+                    <span style="font-size:11.5px;color:var(--faint);">{{ src.followers }} followers</span>
+                  </div>
+                  <button style="margin-left:auto;padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;">Follow</button>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;">
+            <span style="font-family:'Space Grotesk';font-weight:600;font-size:14.5px;">Trending tags</span>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:13px;">
+              <sc-for list="{{ trendingTags }}" as="tg" hint-placeholder-count="8">
+                <span style="padding:6px 11px;border-radius:8px;background:var(--card2);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;"># {{ tg }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </aside>
+      </div>
+      </sc-if>
+
+      <!-- ---------- ARTICLE DETAIL ---------- -->
+      <sc-if value="{{ isArticle }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:760px;margin:0 auto;padding:26px 28px 80px;">
+        <button onClick="{{ backToFeed }}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:22px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg> Back to feed
+        </button>
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:16px;">
+          <span style="{{ current.sourceStyle }}">{{ current.glyph }}</span>
+          <span style="font-size:13.5px;color:var(--muted);font-weight:600;">{{ current.source }}</span>
+          <span style="width:3px;height:3px;border-radius:50%;background:var(--faint);"></span>
+          <span style="font-size:13px;color:var(--faint);">{{ current.date }} ago</span>
+        </div>
+        <span style="display:inline-block;padding:5px 12px;border-radius:8px;background:rgba(139,124,248,.14);color:var(--acc);font-size:12px;font-weight:600;margin-bottom:14px;">{{ current.tag }}</span>
+        <h1 style="font-family:'Space Grotesk';font-size:32px;line-height:1.2;font-weight:700;margin:0 0 18px;letter-spacing:-.02em;">{{ current.title }}</h1>
+        <div style="display:flex;align-items:center;gap:16px;color:var(--faint);font-size:13.5px;margin-bottom:22px;">
+          <span style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ current.readMin }} min read</span>
+          <span>{{ current.reads }} reads</span>
+        </div>
+        <div style="{{ current.heroStyle }}"></div>
+        <div style="border-left:3px solid var(--acc);background:var(--card);border-radius:0 12px 12px 0;padding:16px 18px;margin:0 0 26px;">
+          <div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--acc);text-transform:uppercase;margin-bottom:7px;">TL;DR</div>
+          <p style="font-size:14.5px;line-height:1.55;color:var(--text);margin:0;">{{ current.summary }}</p>
+        </div>
+        <sc-for list="{{ current.body }}" as="para" hint-placeholder-count="4">
+          <p style="font-size:16px;line-height:1.72;color:#cdd6df;margin:0 0 20px;">{{ para }}</p>
+        </sc-for>
+
+        <!-- action bar -->
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:24px 0 30px;">
+          <button data-id="{{ current.id }}" onClick="{{ toggleUpvote }}" style="{{ current.upBtnStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>{{ current.voteCount }}</button>
+          <button data-id="{{ current.id }}" onClick="{{ toggleBookmark }}" style="{{ current.bmBtnStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="{{ current.bmFill }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg>{{ current.bmLabel }}</button>
+          <button style="display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share</button>
+          <a href="#" onClick="{{ noop }}" style="margin-left:auto;display:flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;background:var(--acc);color:#0d1016;font-family:'Space Grotesk';font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;">Read full article ↗</a>
+        </div>
+
+        <!-- you might also like -->
+        <h2 style="font-family:'Space Grotesk';font-size:19px;font-weight:700;margin:0 0 16px;letter-spacing:-.01em;">You might also like</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+          <sc-for list="{{ current.related }}" as="rec" hint-placeholder-count="3">
+            <article data-id="{{ rec.id }}" onClick="{{ openArticle }}" style="display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .16s;" style-hover="border-color:var(--acc)">
+              <span style="{{ rec.sourceStyle }}">{{ rec.glyph }}</span>
+              <h4 style="font-family:'Space Grotesk';font-size:14px;line-height:1.35;font-weight:600;margin:4px 0 0;">{{ rec.title }}</h4>
+              <span style="font-size:12px;color:var(--faint);margin-top:auto;">{{ rec.source }} · {{ rec.readMin }}m</span>
+            </article>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ---------- BOOKMARKS ---------- -->
+      <sc-if value="{{ isBookmarks }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:1100px;margin:0 auto;padding:26px 28px 60px;">
+        <h1 style="font-family:'Space Grotesk';font-size:24px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em;">Saved for later</h1>
+        <p style="font-size:14px;color:var(--muted);margin:0 0 22px;">{{ bookmarkCount }} bookmarked · organized by tag & date</p>
+
+        <sc-if value="{{ hasBookmarks }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+          <sc-for list="{{ bookmarkedFeed }}" as="article" hint-placeholder-count="3">
+            <article data-id="{{ article.id }}" onClick="{{ openArticle }}" style="display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .16s,transform .16s;" style-hover="border-color:var(--acc);transform:translateY(-3px)">
+              <div style="{{ article.thumbStyle }}"><span style="padding:4px 10px;border-radius:7px;background:rgba(13,16,22,.6);font-size:11px;font-weight:600;color:#fff;">{{ article.tag }}</span></div>
+              <div style="padding:15px;display:flex;flex-direction:column;gap:8px;flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="{{ article.sourceStyle }}">{{ article.glyph }}</span><span style="font-size:12.5px;color:var(--muted);">{{ article.source }}</span></div>
+                <h3 style="font-family:'Space Grotesk';font-size:15.5px;line-height:1.32;font-weight:600;margin:0;">{{ article.title }}</h3>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:8px;color:var(--faint);font-size:12.5px;">
+                  <span>{{ article.readMin }}m</span>
+                  <button data-id="{{ article.id }}" onClick="{{ toggleBookmark }}" style="margin-left:auto;display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;border:none;background:transparent;color:var(--amber);font-size:12px;font-weight:600;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg>Saved</button>
+                </div>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ noBookmarks }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:80px 20px;text-align:center;">
+          <div style="width:60px;height:60px;border-radius:16px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--faint);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></div>
+          <div><h3 style="font-family:'Space Grotesk';font-size:18px;font-weight:600;margin:0 0 6px;">No bookmarks yet</h3><p style="font-size:14px;color:var(--muted);margin:0;">Tap the bookmark icon on any article to save it here.</p></div>
+          <button onClick="{{ backToFeed }}" style="padding:11px 24px;border-radius:10px;border:none;background:var(--acc);color:#0d1016;font-family:'Space Grotesk';font-weight:600;font-size:14px;cursor:pointer;">Browse the feed</button>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- ---------- PROFILE ---------- -->
+      <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:1000px;margin:0 auto;padding:26px 28px 70px;">
+        <div style="display:flex;align-items:center;gap:20px;background:linear-gradient(150deg,rgba(139,124,248,.14),transparent);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:24px;">
+          <div style="width:74px;height:74px;border-radius:50%;background:linear-gradient(140deg,#8b7cf8,#f6a723);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:26px;color:#0d1016;flex-shrink:0;">JV</div>
+          <div style="flex:1;">
+            <h1 style="font-family:'Space Grotesk';font-size:24px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em;">Jayasuriya V</h1>
+            <p style="font-size:14px;color:var(--muted);margin:0 0 10px;">{{ roleLabel }} · Joined Jan 2025</p>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;">
+              <sc-for list="{{ myTopics }}" as="t" hint-placeholder-count="5">
+                <span style="padding:4px 10px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);">{{ t }}</span>
+              </sc-for>
+            </div>
+          </div>
+          <button style="padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13.5px;font-weight:600;cursor:pointer;align-self:flex-start;">Edit profile</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
+          <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;">
+              <div style="font-family:'Space Grotesk';font-size:26px;font-weight:700;color:{{ s.color }};line-height:1;">{{ s.value }}</div>
+              <div style="font-size:12.5px;color:var(--muted);margin-top:7px;">{{ s.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- contribution grid -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <span style="font-family:'Space Grotesk';font-weight:600;font-size:15.5px;">Reading activity</span>
+            <button style="display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share streak</button>
+          </div>
+          <div style="display:flex;gap:3px;overflow-x:auto;padding-bottom:6px;">
+            <sc-for list="{{ weeks }}" as="week" hint-placeholder-count="17">
+              <div style="display:flex;flex-direction:column;gap:3px;">
+                <sc-for list="{{ week.days }}" as="day" hint-placeholder-count="7">
+                  <div style="{{ day.style }}"></div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:11.5px;color:var(--faint);">
+            <span>Less</span>
+            <div style="width:11px;height:11px;border-radius:3px;background:#1a1f28;"></div>
+            <div style="width:11px;height:11px;border-radius:3px;background:rgba(139,124,248,.35);"></div>
+            <div style="width:11px;height:11px;border-radius:3px;background:rgba(139,124,248,.6);"></div>
+            <div style="width:11px;height:11px;border-radius:3px;background:rgba(139,124,248,.82);"></div>
+            <div style="width:11px;height:11px;border-radius:3px;background:#8b7cf8;"></div>
+            <span>More</span>
+          </div>
+        </div>
+
+        <!-- reading hours -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;">
+          <span style="font-family:'Space Grotesk';font-weight:600;font-size:15.5px;">Reading hours · last 12 weeks</span>
+          <div style="display:flex;align-items:flex-end;gap:10px;height:150px;margin-top:20px;">
+            <sc-for list="{{ readingBars }}" as="bar" hint-placeholder-count="12">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;">
+                <div style="{{ bar.style }}"></div>
+                <span style="font-size:10.5px;color:var(--faint);">{{ bar.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ---------- SQUADS ---------- -->
+      <sc-if value="{{ isSquads }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width:1200px;margin:0 auto;padding:26px 28px 60px;">
+        <sc-if value="{{ noSquadOpen }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+            <div><h1 style="font-family:'Space Grotesk';font-size:24px;font-weight:700;margin:0 0 4px;letter-spacing:-.02em;">Squads</h1><p style="font-size:14px;color:var(--muted);margin:0;">Read, share, and discuss with your people.</p></div>
+            <button style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;border:none;background:var(--acc);color:#0d1016;font-family:'Space Grotesk';font-weight:600;font-size:13.5px;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Create squad</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+            <sc-for list="{{ squads }}" as="sq" hint-placeholder-count="6">
+              <div data-id="{{ sq.id }}" onClick="{{ openSquad }}" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;cursor:pointer;transition:border-color .16s,transform .16s;" style-hover="border-color:var(--acc);transform:translateY(-3px)">
+                <div style="{{ sq.bannerStyle }}"></div>
+                <h3 style="font-family:'Space Grotesk';font-size:16px;font-weight:600;margin:14px 0 5px;">{{ sq.name }}</h3>
+                <p style="font-size:12.8px;color:var(--muted);margin:0 0 14px;line-height:1.45;">{{ sq.desc }}</p>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:12px;color:var(--faint);">{{ sq.members }} members</span>
+                  <span style="width:3px;height:3px;border-radius:50%;background:var(--faint);"></span>
+                  <span style="font-size:12px;color:var(--green);">{{ sq.active }} active now</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- squad detail -->
+        <sc-if value="{{ squadOpen }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <button onClick="{{ backToSquads }}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:20px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>All squads</button>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+            <div style="{{ currentSquad.avatarStyle }}">{{ currentSquad.initial }}</div>
+            <div style="flex:1;"><h1 style="font-family:'Space Grotesk';font-size:22px;font-weight:700;margin:0 0 3px;letter-spacing:-.02em;">{{ currentSquad.name }}</h1><p style="font-size:13.5px;color:var(--muted);margin:0;">{{ currentSquad.members }} members · {{ currentSquad.desc }}</p></div>
+            <button style="padding:10px 18px;border-radius:10px;border:none;background:var(--acc);color:#0d1016;font-family:'Space Grotesk';font-weight:600;font-size:13.5px;cursor:pointer;">Invite</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 280px;gap:22px;align-items:start;">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <span style="font-size:12px;font-weight:600;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;">Shared in this squad</span>
+              <sc-for list="{{ squadShares }}" as="sh" hint-placeholder-count="4">
+                <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
+                  <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
+                    <span style="{{ sh.avatarStyle }}">{{ sh.who }}</span>
+                    <span style="font-size:13px;font-weight:600;">{{ sh.name }}</span>
+                    <span style="font-size:12px;color:var(--faint);">shared · {{ sh.when }}</span>
+                  </div>
+                  <div data-id="{{ sh.id }}" onClick="{{ openArticle }}" style="display:flex;gap:12px;background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:12px;cursor:pointer;">
+                    <div style="{{ sh.thumbStyle }}"></div>
+                    <div style="flex:1;min-width:0;"><h4 style="font-family:'Space Grotesk';font-size:14px;line-height:1.32;font-weight:600;margin:0 0 5px;">{{ sh.title }}</h4><span style="font-size:12px;color:var(--faint);">{{ sh.source }} · {{ sh.readMin }}m</span></div>
+                  </div>
+                </div>
+              </sc-for>
+              <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 8px 8px 16px;margin-top:4px;">
+                <input placeholder="Share an article or message…" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'IBM Plex Sans';font-size:13.5px;">
+                <button style="padding:9px 18px;border-radius:9px;border:none;background:var(--acc);color:#0d1016;font-weight:600;font-size:13px;cursor:pointer;">Send</button>
+              </div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;">
+              <span style="font-family:'Space Grotesk';font-weight:600;font-size:14px;">Members</span>
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px;">
+                <sc-for list="{{ squadMembers }}" as="m" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="{{ m.avatarStyle }}">{{ m.initial }}</span>
+                    <span style="font-size:13px;font-weight:500;">{{ m.name }}</span>
+                    <span style="{{ m.dotStyle }}"></span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:920},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#f6a723&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#8b7cf8&quot;,&quot;#6ea8fe&quot;,&quot;#34d399&quot;,&quot;#f6a723&quot;,&quot;#ff7a59&quot;],&quot;section&quot;:&quot;Theme&quot;},&quot;showThumbnails&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Feed&quot;},&quot;feedColumns&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:4,&quot;min&quot;:2,&quot;max&quot;:4,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Feed&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'onboarding',   // onboarding | home | article | bookmarks | profile | squads
+    onboardStep: 'login',   // login | role | topics
+    role: 'pm',
+    topics: ['Roadmapping','Discovery','OKRs','Growth','Analytics'],
+    feedTab: 'new',
+    articleId: 1,
+    squadId: null,
+    bookmarks: [1, 4],
+    upvotes: [2],
+  };
+
+  // ---------- static data ----------
+  ROLES = [
+    { id:'pm', label:'Product Manager', mono:'PM', color:'#8b7cf8', desc:'Roadmaps, specs, prioritization' },
+    { id:'apm', label:'Associate PM', mono:'APM', color:'#6ea8fe', desc:'Learning the craft' },
+    { id:'design', label:'Product Designer', mono:'PD', color:'#34d399', desc:'UX, UI, prototyping' },
+    { id:'mkt', label:'Product Marketer', mono:'PMM', color:'#f6a723', desc:'GTM, positioning' },
+    { id:'founder', label:'Founder / CPO', mono:'F', color:'#ff7a59', desc:'0-to-1, product vision' },
+    { id:'dev', label:'Developer', mono:'DEV', color:'#e879f9', desc:'Building the product' },
+  ];
+  ALL_TOPICS = ['Roadmapping','Discovery','Jobs-to-be-Done','OKRs','Growth','UX Research','Design Systems','Product-Led Growth','Pricing','Analytics','AI & ML','Leadership','Go-to-Market','Prioritization'];
+  SRC = {
+    'Product Coalition':'#f6a723','Lenny\u2019s Newsletter':'#8b7cf8','Mind the Product':'#34d399',
+    'Substack':'#ff7a59','Sidebar':'#6ea8fe','Department of Product':'#e879f9','Medium':'#cbd5e1','Product School':'#f472b6'
+  };
+  ARTICLES = [
+    {id:1,title:'Why your roadmap should be a list, not a timeline',source:'Product Coalition',glyph:'P',tag:'Roadmapping',summary:'Timelines create promises you can\u2019t keep. Outcome-based roadmaps keep teams aligned without lying about dates.',readMin:6,votes:342,comments:48,reads:1200,date:'2h',h1:255,h2:282},
+    {id:2,title:'The PM\u2019s guide to PRDs engineers actually read',source:'Lenny\u2019s Newsletter',glyph:'L',tag:'Writing',summary:'Cut the fluff. A tight spec structure that gets features built right the first time.',readMin:8,votes:512,comments:91,reads:2100,date:'4h',h1:210,h2:236},
+    {id:3,title:'Jobs-to-be-Done: a practical field guide',source:'Mind the Product',glyph:'M',tag:'Discovery',summary:'Move past personas. Interview for the job customers are actually hiring your product to do.',readMin:7,votes:289,comments:33,reads:980,date:'5h',h1:18,h2:42},
+    {id:4,title:'OKRs are broken. Here\u2019s what to do instead.',source:'Substack',glyph:'S',tag:'Strategy',summary:'Most teams cargo-cult OKRs. A lighter operating rhythm that actually drives focus.',readMin:5,votes:401,comments:120,reads:1500,date:'8h',h1:145,h2:172},
+    {id:5,title:'Onboarding that reduces time-to-value',source:'Sidebar',glyph:'S',tag:'UX',summary:'The first five minutes decide retention. Patterns for the fastest path to the aha moment.',readMin:6,votes:233,comments:27,reads:870,date:'11h',h1:300,h2:330},
+    {id:6,title:'The economics of freemium: when to gate a feature',source:'Department of Product',glyph:'D',tag:'Pricing',summary:'Free isn\u2019t a strategy. A framework for what to give away and what to charge for.',readMin:9,votes:356,comments:54,reads:1100,date:'14h',h1:28,h2:8},
+    {id:7,title:'Reading the room: qualitative signals in interviews',source:'Medium',glyph:'M',tag:'Research',summary:'What users don\u2019t say matters most. Techniques for hearing the signal beneath the words.',readMin:5,votes:178,comments:19,reads:640,date:'1d',h1:190,h2:216},
+    {id:8,title:'How great PMs run a discovery sprint',source:'Product School',glyph:'P',tag:'Discovery',summary:'A repeatable one-week loop to de-risk your next bet before a single line of code.',readMin:7,votes:267,comments:41,reads:900,date:'1d',h1:265,h2:292},
+    {id:9,title:'Metrics that lie: vanity vs. actionable',source:'Mind the Product',glyph:'M',tag:'Analytics',summary:'DAU feels great until it doesn\u2019t. How to pick metrics that actually change decisions.',readMin:6,votes:312,comments:63,reads:1050,date:'1d',h1:160,h2:186},
+    {id:10,title:'The art of saying no to stakeholders',source:'Lenny\u2019s Newsletter',glyph:'L',tag:'Leadership',summary:'Prioritization is a people problem. Scripts for protecting the roadmap with grace.',readMin:5,votes:445,comments:88,reads:1700,date:'2d',h1:10,h2:36},
+    {id:11,title:'Product-led growth beyond the buzzword',source:'Substack',glyph:'S',tag:'Growth',summary:'PLG isn\u2019t a free trial. The org design and instrumentation that make self-serve work.',readMin:8,votes:298,comments:44,reads:950,date:'2d',h1:240,h2:270},
+    {id:12,title:'Building a design system your PMs will use',source:'Sidebar',glyph:'S',tag:'Design',summary:'Adoption is the hard part. Shipping a system that survives contact with real teams.',readMin:7,votes:201,comments:22,reads:720,date:'3d',h1:285,h2:315},
+  ];
+  SQUADS = [
+    {id:'s1',name:'PM Book Club',desc:'Weekly product reads & lively discussion.',members:128,active:12,hue:255},
+    {id:'s2',name:'0\u21921 Founders',desc:'Early-stage builders sharing what\u2019s working.',members:64,active:8,hue:20},
+    {id:'s3',name:'Design + Product',desc:'Where UX and PM meet. Case studies galore.',members:212,active:19,hue:150},
+    {id:'s4',name:'Growth Nerds',desc:'Experiments, funnels, and activation tactics.',members:96,active:5,hue:200},
+    {id:'s5',name:'APM Circle',desc:'Breaking into product, together.',members:340,active:24,hue:290},
+    {id:'s6',name:'AI for PMs',desc:'Shipping with LLMs without the hype.',members:180,active:31,hue:330},
+  ];
+  MEMBERS = [
+    {name:'Aarav Shah',initial:'AS',hue:255,online:true},
+    {name:'Priya Nair',initial:'PN',hue:20,online:true},
+    {name:'Leo Martins',initial:'LM',hue:150,online:false},
+    {name:'Mia Chen',initial:'MC',hue:290,online:true},
+    {name:'Sam Okoro',initial:'SO',hue:200,online:false},
+  ];
+
+  // ---------- helpers ----------
+  srcStyle(color){ return {width:'22px',height:'22px',borderRadius:'6px',background:color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',fontWeight:'700',color:'#0d1016',flexShrink:0}; }
+  thumb(a,h){ return {height:(h||150)+'px',background:`linear-gradient(135deg,hsl(${a.h1} 62% 46%),hsl(${a.h2} 58% 26%))`,position:'relative',display:'flex',alignItems:'flex-end',padding:'12px'}; }
+  articleView(a){
+    const bm = this.state.bookmarks.includes(a.id);
+    const up = this.state.upvotes.includes(a.id);
+    return { ...a,
+      sourceStyle:this.srcStyle(this.SRC[a.source]||'#8b7cf8'),
+      thumbStyle:this.thumb(a),
+      voteCount:a.votes+(up?1:0),
+      upStyle:{display:'flex',alignItems:'center',gap:'5px',padding:'4px 8px',borderRadius:'8px',border:'none',background:'transparent',cursor:'pointer',fontFamily:'inherit',fontSize:'12.5px',fontWeight:'600',color:up?'var(--green)':'var(--faint)'},
+      bmStyle:{display:'flex',alignItems:'center',padding:'4px 6px',borderRadius:'8px',border:'none',background:'transparent',cursor:'pointer',marginLeft:'auto',color:bm?'var(--amber)':'var(--faint)'},
+      bmFill:bm?'currentColor':'none',
+    };
+  }
+
+  // ---------- handlers ----------
+  scrollTop(){ if(this.mainRef) this.mainRef.scrollTo(0,0); }
+  setRoot = el => { this._root = el; };
+  setMainRef = el => { this.mainRef = el; };
+  googleLogin = () => this.setState({onboardStep:'role'});
+  selectRole = e => this.setState({role:e.currentTarget.dataset.role});
+  continueToTopics = () => this.setState({onboardStep:'topics'});
+  backToRole = () => this.setState({onboardStep:'role'});
+  toggleTopic = e => { const t=e.currentTarget.dataset.topic; const cur=this.state.topics; this.setState({topics:cur.includes(t)?cur.filter(x=>x!==t):[...cur,t]}); };
+  finishOnboarding = () => this.setState({screen:'home'});
+  nav = e => { this.setState({screen:e.currentTarget.dataset.screen, squadId:null}, ()=>this.scrollTop()); };
+  gotoProfile = () => this.setState({screen:'profile'}, ()=>this.scrollTop());
+  openArticle = e => { this.setState({screen:'article', articleId:Number(e.currentTarget.dataset.id)}, ()=>this.scrollTop()); };
+  backToFeed = () => this.setState({screen:'home'}, ()=>this.scrollTop());
+  setTab = e => this.setState({feedTab:e.currentTarget.dataset.tab});
+  toggleUpvote = e => { e.stopPropagation(); const id=Number(e.currentTarget.dataset.id); const cur=this.state.upvotes; this.setState({upvotes:cur.includes(id)?cur.filter(x=>x!==id):[...cur,id]}); };
+  toggleBookmark = e => { e.stopPropagation(); const id=Number(e.currentTarget.dataset.id); const cur=this.state.bookmarks; this.setState({bookmarks:cur.includes(id)?cur.filter(x=>x!==id):[...cur,id]}); };
+  openSquad = e => this.setState({squadId:e.currentTarget.dataset.id}, ()=>this.scrollTop());
+  backToSquads = () => this.setState({squadId:null});
+  noop = e => { e.preventDefault(); };
+
+  renderVals(){
+    const s = this.state;
+    const accent = this.props.accent || '#8b7cf8';
+    const showThumbs = this.props.showThumbnails !== false;
+    const cols = this.props.feedColumns || 3;
+
+    // feed sorting
+    let feed = [...this.ARTICLES];
+    if(s.feedTab==='hot') feed.sort((a,b)=>(b.votes+b.comments)-(a.votes+a.comments));
+    else if(s.feedTab==='read') feed.sort((a,b)=>b.reads-a.reads);
+    else if(s.feedTab==='liked') feed.sort((a,b)=>b.votes-a.votes);
+    feed = feed.map(a=>this.articleView(a));
+
+    // current article
+    const raw = this.ARTICLES.find(a=>a.id===s.articleId) || this.ARTICLES[0];
+    const cv = this.articleView(raw);
+    const bmOn = s.bookmarks.includes(raw.id);
+    const upOn = s.upvotes.includes(raw.id);
+    const current = { ...cv,
+      heroStyle:{height:'220px',borderRadius:'14px',marginBottom:'26px',background:`linear-gradient(135deg,hsl(${raw.h1} 62% 46%),hsl(${raw.h2} 58% 26%))`},
+      body:[
+        `${raw.summary} It sounds obvious once you say it out loud, but the day-to-day reality of product work makes it surprisingly easy to lose the thread.`,
+        'The teams that get this right treat it less as a one-time decision and more as a habit \u2014 a small, repeated discipline applied consistently over months. That compounding is where the real leverage lives.',
+        'Start small. Pick one surface where the idea is easy to test, instrument it well enough to learn something, and give it a couple of weeks before you judge the result. Most of the value shows up in the second and third iteration, not the first.',
+        'None of this replaces judgment. Frameworks are scaffolding, not answers \u2014 the point is to free up attention for the genuinely hard calls that only you, close to the customer and the context, can make.'
+      ],
+      upBtnStyle:{display:'flex',alignItems:'center',gap:'7px',padding:'9px 16px',borderRadius:'10px',border:'1px solid '+(upOn?'transparent':'var(--border)'),background:upOn?'rgba(52,211,153,.14)':'var(--card)',color:upOn?'var(--green)':'var(--muted)',fontSize:'13.5px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'},
+      bmBtnStyle:{display:'flex',alignItems:'center',gap:'7px',padding:'9px 16px',borderRadius:'10px',border:'1px solid '+(bmOn?'transparent':'var(--border)'),background:bmOn?'rgba(246,167,35,.14)':'var(--card)',color:bmOn?'var(--amber)':'var(--muted)',fontSize:'13.5px',fontWeight:'600',cursor:'pointer',fontFamily:'inherit'},
+      bmFill:bmOn?'currentColor':'none',
+      bmLabel:bmOn?'Saved':'Save',
+      related:this.ARTICLES.filter(a=>a.id!==raw.id).slice(0,3).map(a=>this.articleView(a)),
+    };
+
+    // roles view
+    const roles = this.ROLES.map(r=>{ const sel=r.id===s.role; return {...r,
+      cardStyle:{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:'8px',padding:'18px',borderRadius:'14px',textAlign:'left',cursor:'pointer',fontFamily:'inherit',background:sel?'rgba(139,124,248,.10)':'var(--card)',border:'1.5px solid '+(sel?'var(--acc)':'var(--border)'),transition:'border-color .15s,background .15s'},
+      monoStyle:{width:'38px',height:'38px',borderRadius:'10px',background:r.color,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Space Grotesk',fontWeight:'700',fontSize:'13px',color:'#0d1016'},
+    }; });
+
+    // topics view
+    const topics = this.ALL_TOPICS.map(t=>{ const sel=s.topics.includes(t); return {name:t,
+      chipStyle:{padding:'9px 16px',borderRadius:'10px',cursor:'pointer',fontFamily:'inherit',fontSize:'13.5px',fontWeight:'500',background:sel?'var(--acc)':'var(--card)',border:'1px solid '+(sel?'var(--acc)':'var(--border)'),color:sel?'#0d1016':'var(--muted)',transition:'all .12s'} };
+    });
+
+    // nav
+    const icons = {home:'M3 10.5 12 3l9 7.5|M5 9.5V21h14V9.5',bookmarks:'M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z',squads:'',profile:''};
+    const navDefs = [
+      {id:'home',label:'Home'},
+      {id:'bookmarks',label:'Bookmarks'},
+      {id:'squads',label:'Squads'},
+      {id:'profile',label:'Profile'},
+    ];
+    const navItems = navDefs.map(n=>{ const active=s.screen===n.id||(n.id==='home'&&s.screen==='article');
+      return {...n,
+        style:{display:'flex',alignItems:'center',gap:'11px',padding:'10px 12px',borderRadius:'10px',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'14px',fontWeight:active?'600':'500',width:'100%',textAlign:'left',background:active?'rgba(139,124,248,.12)':'transparent',color:active?'var(--acc)':'var(--muted)'},
+        iconRef:(el)=>{ if(el) el.innerHTML=this._navIcon(n.id); },
+      };
+    });
+
+    // mini streak (right rail) - 7 days
+    const miniLevels=[3,4,2,4,3,4,1];
+    const miniStreak=miniLevels.map(l=>({style:{flex:1,height:'32px',borderRadius:'6px',background:this._lvlColor(l)}}));
+
+    // top sources
+    const topSources=[
+      {name:'Lenny\u2019s Newsletter',glyph:'L',followers:'706k',color:'#8b7cf8'},
+      {name:'Mind the Product',glyph:'M',followers:'214k',color:'#34d399'},
+      {name:'Product Coalition',glyph:'P',followers:'1.0M',color:'#f6a723'},
+      {name:'Sidebar',glyph:'S',followers:'88k',color:'#6ea8fe'},
+    ].map(x=>({...x,style:this.srcStyle(x.color)}));
+
+    // profile
+    const roleObj=this.ROLES.find(r=>r.id===s.role)||this.ROLES[0];
+    const stats=[
+      {value:'24',label:'Day streak',color:'var(--amber)'},
+      {value:'142h',label:'Hours read',color:'var(--acc)'},
+      {value:'318',label:'Articles read',color:'var(--green)'},
+      {value:s.upvotes.length+95,label:'Upvotes given',color:'#6ea8fe'},
+    ];
+    const weeks=[]; let seed=7;
+    for(let w=0;w<17;w++){ const days=[]; for(let d=0;d<7;d++){ seed=(seed*9301+49297)%233280; const r=seed/233280; let lvl=r<0.28?0:r<0.5?1:r<0.72?2:r<0.9?3:4; days.push({style:{width:'12px',height:'12px',borderRadius:'3px',background:this._lvlColor(lvl)}}); } weeks.push({days}); }
+    const barVals=[6,9,4,11,7,13,8,10,5,12,9,14];
+    const maxBar=Math.max(...barVals);
+    const readingBars=barVals.map((v,i)=>({label:'W'+(i+1),style:{width:'100%',maxWidth:'26px',height:Math.round(v/maxBar*100)+'%',borderRadius:'6px 6px 0 0',background:i===barVals.length-1?'var(--acc)':'rgba(139,124,248,.4)'}}));
+
+    // squads
+    const squads=this.SQUADS.map(sq=>({...sq,bannerStyle:{height:'70px',borderRadius:'12px',background:`linear-gradient(135deg,hsl(${sq.hue} 60% 48%),hsl(${sq.hue+40} 55% 28%))`}}));
+    const sqObj=this.SQUADS.find(x=>x.id===s.squadId);
+    const currentSquad=sqObj?{...sqObj,initial:sqObj.name[0],avatarStyle:{width:'58px',height:'58px',borderRadius:'15px',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Space Grotesk',fontWeight:'700',fontSize:'22px',color:'#0d1016',background:`linear-gradient(135deg,hsl(${sqObj.hue} 60% 52%),hsl(${sqObj.hue+40} 55% 32%))`}}:{initial:'',name:'',members:0,desc:'',avatarStyle:{}};
+    const shareArts=[this.ARTICLES[1],this.ARTICLES[3],this.ARTICLES[9],this.ARTICLES[5]];
+    const sharers=[{who:'AS',hue:255,name:'Aarav',when:'2h'},{who:'PN',hue:20,name:'Priya',when:'5h'},{who:'MC',hue:290,name:'Mia',when:'1d'},{who:'SO',hue:200,name:'Sam',when:'2d'}];
+    const squadShares=shareArts.map((a,i)=>({id:a.id,title:a.title,source:a.source,readMin:a.readMin,who:sharers[i].who,name:sharers[i].name,when:sharers[i].when,avatarStyle:this._avatar(sharers[i].hue,'small'),thumbStyle:{width:'56px',height:'56px',borderRadius:'9px',flexShrink:0,background:`linear-gradient(135deg,hsl(${a.h1} 62% 46%),hsl(${a.h2} 58% 26%))`}}));
+    const squadMembers=this.MEMBERS.map(m=>({...m,avatarStyle:this._avatar(m.hue,'small'),dotStyle:{marginLeft:'auto',width:'8px',height:'8px',borderRadius:'50%',background:m.online?'var(--green)':'#3a4350'}}));
+
+    return {
+      accent, showThumbs,
+      gridStyle:{gridTemplateColumns:`repeat(${cols},minmax(0,1fr))`},
+      // screen flags
+      isOnboarding:s.screen==='onboarding',
+      isApp:s.screen!=='onboarding',
+      isLoginStep:s.onboardStep==='login',
+      isRoleStep:s.onboardStep==='role',
+      isTopicStep:s.onboardStep==='topics',
+      isHome:s.screen==='home',
+      isArticle:s.screen==='article',
+      isBookmarks:s.screen==='bookmarks',
+      isProfile:s.screen==='profile',
+      isSquads:s.screen==='squads',
+      noSquadOpen:s.screen==='squads'&&!s.squadId,
+      squadOpen:s.screen==='squads'&&!!s.squadId,
+      // data
+      roles, topics, feed, current, navItems, miniStreak, topSources, squads, currentSquad, squadShares, squadMembers,
+      myTopics:s.topics, roleLabel:roleObj.label,
+      tabs:[{id:'new',label:'New'},{id:'hot',label:'Hot'},{id:'read',label:'Most Read'},{id:'liked',label:'Top'}].map(t=>({...t,style:{padding:'7px 14px',borderRadius:'8px',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',background:s.feedTab===t.id?'var(--acc)':'transparent',color:s.feedTab===t.id?'#0d1016':'var(--muted)',transition:'all .12s'}})),
+      trendingTags:['Roadmapping','JTBD','PLG','OKRs','Pricing','Discovery','AI','Retention'],
+      // bookmarks
+      bookmarkCount:s.bookmarks.length,
+      hasBookmarks:s.bookmarks.length>0,
+      noBookmarks:s.bookmarks.length===0,
+      bookmarkedFeed:this.ARTICLES.filter(a=>s.bookmarks.includes(a.id)).map(a=>this.articleView(a)),
+      // profile
+      stats, weeks, readingBars,
+      // handlers
+      setRoot:this.setRoot, setMainRef:this.setMainRef, googleLogin:this.googleLogin, selectRole:this.selectRole,
+      continueToTopics:this.continueToTopics, backToRole:this.backToRole, toggleTopic:this.toggleTopic, finishOnboarding:this.finishOnboarding,
+      nav:this.nav, gotoProfile:this.gotoProfile, openArticle:this.openArticle, backToFeed:this.backToFeed, setTab:this.setTab,
+      toggleUpvote:this.toggleUpvote, toggleBookmark:this.toggleBookmark, openSquad:this.openSquad, backToSquads:this.backToSquads, noop:this.noop,
+    };
+  }
+
+  _lvlColor(l){ return ['#1a1f28','rgba(139,124,248,.35)','rgba(139,124,248,.6)','rgba(139,124,248,.82)','#8b7cf8'][l]; }
+  _avatar(hue,size){ const d=size==='small'?'30px':'34px'; return {width:d,height:d,borderRadius:'50%',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'700',color:'#0d1016',background:`linear-gradient(135deg,hsl(${hue} 60% 55%),hsl(${hue+40} 55% 40%))`}; }
+  _navIcon(id){
+    const p='fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+    if(id==='home') return `<svg width="18" height="18" viewBox="0 0 24 24" ${p}><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>`;
+    if(id==='bookmarks') return `<svg width="18" height="18" viewBox="0 0 24 24" ${p}><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg>`;
+    if(id==='squads') return `<svg width="18" height="18" viewBox="0 0 24 24" ${p}><circle cx="9" cy="8" r="3.5"/><path d="M2 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M22 21v-1a6 6 0 0 0-4-5.7"/></svg>`;
+    return `<svg width="18" height="18" viewBox="0 0 24 24" ${p}><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>`;
+  }
+}
+</script>
+</body>
+</html>
