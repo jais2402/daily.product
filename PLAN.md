@@ -120,7 +120,7 @@ Final whole-branch review 2 passed (fix applied in de63a5f: admin-action auth gu
 
 ## Launch checklist (user-side)
 
-1. Apply migration 005 (supabase/migrations/005_public_sources.sql — SQL editor)
+1. ~~Apply migration 005~~ ✓ done (verified)
 2. Vercel: import repo, env vars (URL/anon/service-role/ADMIN_SECRET/CRON_SECRET) — **DEV_LOGIN must remain UNSET in production**
 3. Merge PR #1
 4. Enable Google provider in Supabase + add production URL to Auth redirect list
@@ -134,6 +134,6 @@ Final whole-branch review 2 passed (fix applied in de63a5f: admin-action auth gu
 - [x] Supabase MCP authenticated + migrations 001–004 applied (2026-07-04)
 - [x] `.env.local` keys (all 5 set + verified)
 - [x] Source list confirmed (30 feeds; 2 paused — RSS discontinued upstream)
-- [ ] Migration 005 applied (sources public read — 3-line SQL, fixes source names on feed)
+- [x] Migration 005 applied (verified 2026-07-06: anon reads source names, feed renders them)
 - [ ] Vercel project + domain decision (then merge PR #1 and deploy)
 - [ ] Google OAuth provider (not needed until Phase 4)
