@@ -46,3 +46,58 @@ export function rankByCount(
     .sort((a, b) => b.count - a.count || a.index - b.index)
     .map((entry) => entry.id);
 }
+
+export interface ComposedPage {
+  ids: string[];
+  hasMore: boolean;
+}
+
+/**
+ * Pure pagination over a ranked-then-backfill id list for the "Hot" and
+ * "Most Read" tabs.
+ *
+ * `backfillIds` is expected to already exclude every id in `rankedIds`
+ * (the caller computes this against the FULL ranked list, not just the
+ * current page, so backfill content is stable and disjoint across pages —
+ * see the bug this fixes: previously backfill only excluded the ranked
+ * list, but pagination sliced backfill per-page starting from the same
+ * "not in rankedIds" candidate set each time, so a sparse ranked list
+ * produced the same backfill articles on every page).
+ *
+ * This function still defensively dedupes in case a caller passes
+ * overlapping lists, so a bad caller can't reintroduce duplicate ids
+ * across a single composed page.
+ *
+ * Conceptually: concatenate rankedIds then backfillIds, then slice the
+ * requested page window `[(page-1)*pageSize, page*pageSize)`. `hasMore`
+ * is true when the combined (deduped) list extends past this page's
+ * upper bound.
+ */
+export function composeRankedPage(
+  rankedIds: string[],
+  backfillIds: string[],
+  page: number,
+  pageSize: number,
+): ComposedPage {
+  const seen = new Set<string>();
+  const combined: string[] = [];
+
+  for (const id of rankedIds) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    combined.push(id);
+  }
+  for (const id of backfillIds) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    combined.push(id);
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = page * pageSize;
+
+  return {
+    ids: combined.slice(from, to),
+    hasMore: combined.length > to,
+  };
+}

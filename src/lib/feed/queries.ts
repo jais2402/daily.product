@@ -1,9 +1,22 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { rankByCount } from './rank';
+import { rankByCount, composeRankedPage } from './rank';
 
 export const PAGE_SIZE = 24;
 const HOT_WINDOW_MS = 48 * 60 * 60 * 1000;
 const READ_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Cap on how many top-ordered candidate ids we pull to build the backfill
+ * pool for ranked (hot/read) tabs. This bounds the backfill list to a
+ * "stable enough" candidate set without paying for an unbounded query —
+ * at MVP scale (tens to low hundreds of approved articles) this covers
+ * the whole corpus; if the article count grows well past this, deep
+ * pages of a sparse ranked tab could theoretically run out of backfill
+ * before hitting the true end of the top-ordered list (hasMore would
+ * read false a little early). Not a correctness issue for pagination
+ * disjointness — just a bound on how deep backfill can page.
+ */
+const BACKFILL_CANDIDATE_CAP = 500;
 
 export interface FeedTopic {
   name: string;
@@ -204,44 +217,31 @@ async function fetchArticlesByIdsInRankOrder(
  * inside the time window, rank article ids in JS via `rankByCount`, then
  * fetch + reorder the articles for the requested page slice.
  *
- * Pagination happens over the ranked id list (not a DB range query), so
- * `hasMore` just checks whether there are more ranked ids past this page's
- * window. If the ranked list is shorter than a full page window, we
- * backfill with `top`-ordered articles (upvote_count desc) excluding
- * already-ranked ids, so a tab never looks sparser than it needs to when
- * the interaction data is thin — this trades a little rank purity for a
- * page that's actually full. Boundary exactness (e.g. hasMore off-by-one
- * around the backfill/window edge) is not critical here; ordering
- * correctness is what matters.
+ * Pagination is computed by the pure `composeRankedPage` helper over two
+ * inputs: the ranked id list, and a backfill pool of `top`-ordered ids
+ * that excludes every ranked id. Both inputs are the FULL lists (not
+ * paged), so the same backfill pool is used to compute every page's
+ * slice — this is what keeps pages disjoint. (Previously each page
+ * queried backfill fresh, excluding only `rankedIds`, so with a sparse
+ * ranked list every page's backfill query returned the same top articles
+ * — page 1 and page 2 were identical past the ranked ids.)
+ *
+ * The backfill pool itself is bounded to `BACKFILL_CANDIDATE_CAP`
+ * candidates (see constant doc) rather than being unbounded.
  */
 async function fetchRankedPage(
   supabase: SupabaseClient,
   { topicSlug, page, tab }: { topicSlug: string | null; page: number; tab: 'hot' | 'read' },
 ): Promise<FeedPage> {
   const rankedIds = await fetchRankedIds(supabase, tab);
+  const topIds = await fetchTopCandidateIds(supabase, topicSlug, BACKFILL_CANDIDATE_CAP);
 
-  const from = (page - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE; // exclusive upper bound for a PAGE_SIZE + 1 lookahead slice
+  const rankedIdSet = new Set(rankedIds);
+  const backfillIds = topIds.filter((id) => !rankedIdSet.has(id));
 
-  let pageIds = rankedIds.slice(from, to);
-  const rankedHasMore = rankedIds.length > to;
+  const { ids: pageIds, hasMore } = composeRankedPage(rankedIds, backfillIds, page, PAGE_SIZE);
 
-  // Backfill when this page's ranked-id slice doesn't fill a full
-  // lookahead window (PAGE_SIZE + 1) — top up with `top`-ordered articles
-  // excluding ids already ranked (anywhere in the full ranked list, not
-  // just this page, to avoid duplicates across pages). Fetch one extra
-  // beyond what's needed so its presence alone tells us `hasMore`.
-  let hasMore = rankedHasMore;
-  if (pageIds.length < PAGE_SIZE + 1 && !rankedHasMore) {
-    const need = PAGE_SIZE + 1 - pageIds.length;
-    const backfill = await fetchTopBackfillIds(supabase, topicSlug, rankedIds, need);
-    hasMore = pageIds.length + backfill.length > PAGE_SIZE;
-    pageIds = pageIds.concat(backfill);
-  }
-
-  const pageSlice = pageIds.slice(0, PAGE_SIZE);
-
-  const articles = await fetchArticlesByIdsInRankOrder(supabase, topicSlug, pageSlice);
+  const articles = await fetchArticlesByIdsInRankOrder(supabase, topicSlug, pageIds);
 
   return { articles, hasMore };
 }
@@ -274,26 +274,24 @@ async function fetchRankedIds(
 }
 
 /**
- * Backfill ids for a ranked tab page: `top`-ordered (upvote_count desc,
- * published_at desc) articles excluding ids already present in the ranked
- * list, respecting the topic filter + approved status.
+ * Fetch a stable, `top`-ordered (upvote_count desc, published_at desc)
+ * candidate id list for backfilling ranked tab pages, respecting the
+ * topic filter + approved status. Capped at `limit` (see
+ * `BACKFILL_CANDIDATE_CAP`) — this is the FULL candidate pool, not a
+ * per-page query, so callers can derive a stable backfill list (minus
+ * ranked ids) once and paginate over it without repeating articles
+ * across pages.
  */
-async function fetchTopBackfillIds(
+async function fetchTopCandidateIds(
   supabase: SupabaseClient,
   topicSlug: string | null,
-  excludeIds: string[],
   limit: number,
 ): Promise<string[]> {
   const topicId = await resolveTopicFilter(supabase, topicSlug);
   const query = baseArticleQuery(supabase, topicId);
   if (!query) return [];
 
-  let withExclusion = query;
-  if (excludeIds.length > 0) {
-    withExclusion = withExclusion.not('id', 'in', `(${excludeIds.join(',')})`);
-  }
-
-  const { data, error } = await withExclusion
+  const { data, error } = await query
     .order('upvote_count', { ascending: false })
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(limit);
