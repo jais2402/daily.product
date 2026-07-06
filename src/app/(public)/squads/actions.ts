@@ -32,7 +32,10 @@ const createSquadSchema = z.object({
  * doesn't require read access), then insert the owner membership. Only
  * after both succeed do we redirect to the squad page (which reads it back
  * under RLS as a now-legitimate member). If the membership insert fails we
- * best-effort delete the now-orphaned (and otherwise invisible) squad row.
+ * delete the now-orphaned squad row with the ADMIN client — `squads` has no
+ * delete policy, so a user-client delete would silently no-op and strand an
+ * invisible row. This compensating delete only ever targets the row this
+ * very action just created (id minted above).
  */
 export async function createSquad(
   formData: FormData,
@@ -64,7 +67,8 @@ export async function createSquad(
     role: 'owner',
   });
   if (memberError) {
-    await supabase.from('squads').delete().eq('id', id);
+    // Admin client required: no delete policy exists on squads (see docblock).
+    await createAdminSupabase().from('squads').delete().eq('id', id);
     return { error: 'Could not create squad' };
   }
 
