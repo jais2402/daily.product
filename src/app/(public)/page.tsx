@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { getServerSupabase, getSessionUser, getOwnProfile, getOwnReadDates } from '@/lib/supabase/cached';
 import { parseFeedParams, type FeedTab } from '@/lib/feed/params';
 import {
   fetchFeedPage,
@@ -9,6 +9,7 @@ import {
   type RecommendedArticle,
 } from '@/lib/feed/queries';
 import { currentStreak } from '@/lib/streaks';
+import { firstWord } from '@/lib/identity';
 import { FeedCard } from './feed-card';
 import { Rail, type StreakInfo } from './rail';
 
@@ -48,32 +49,45 @@ export default async function Home({
   searchParams: Promise<{ topic?: string; page?: string; tab?: string }>;
 }) {
   const { topicSlug, page, tab } = parseFeedParams(await searchParams);
-  const supabase = await createServerSupabase();
+  const supabase = await getServerSupabase();
 
-  const [{ articles, hasMore }, topics] = await Promise.all([
+  // getSessionUser is request-scoped (React `cache()`) so this getUser()
+  // call is shared with sidebar.tsx and topbar-user.tsx rather than
+  // re-querying per component.
+  const [{ articles, hasMore }, topics, user] = await Promise.all([
     fetchFeedPage(supabase, { topicSlug, page, tab }),
     fetchTopicsWithCounts(supabase),
+    getSessionUser(),
   ]);
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const signedIn = Boolean(user);
 
-  // Rail streak card (design-handoff.md §5 card 1) is signed-in only. Rail is
-  // a server component but is only ever rendered from this page, so we fetch
-  // the user's read dates here (page.tsx already knows the user) and pass a
-  // `streak` prop down rather than have Rail re-derive auth itself.
+  // Signed-in-only data: streak (rail streak card + greeting math), profile
+  // (personalized greeting), "You might like" / "Recent bookmarks" rail
+  // cards (Phase 8 Task 1). All four are independent of each other, so they
+  // run in a single Promise.all rather than sequential awaits. `readDates`
+  // and `profile` come from the cached helpers (shared with topbar-user.tsx
+  // / sidebar.tsx); recommendations/bookmarks stay page.tsx-only fetches
+  // since no other component needs them. Rail is a server component but is
+  // only ever rendered from this page, so we pass `streak` / recs /
+  // bookmarks down as props rather than have Rail re-derive auth itself.
   let streak: StreakInfo | null = null;
+  let firstName: string | null = null;
+  let recommendations: RecommendedArticle[] | null = null;
+  let recentBookmarks: RecommendedArticle[] | null = null;
+
   if (user) {
+    const [readDates, profile, recs, bookmarks] = await Promise.all([
+      getOwnReadDates(),
+      getOwnProfile(),
+      fetchRecommendations(supabase, user.id),
+      fetchRecentBookmarks(supabase, user.id),
+    ]);
+
+    firstName = profile?.display_name ? firstWord(profile.display_name) : null;
+    recommendations = recs;
+    recentBookmarks = bookmarks;
+
     const today = new Date().toISOString().slice(0, 10);
-    const { data: readRows } = await supabase
-      .from('reads')
-      .select('read_date')
-      .eq('user_id', user.id)
-      .order('read_date', { ascending: false })
-      .limit(60);
-    const readDates = (readRows ?? []).map((row) => row.read_date as string);
     const days = currentStreak(readDates, today);
     const readToday = readDates.includes(today);
 
@@ -89,20 +103,6 @@ export default async function Home({
     streak = { days, readToday, last7Counts };
   }
 
-  // "You might like" + "Recent bookmarks" rail cards (Phase 8 Task 1) are
-  // signed-in only, same page.tsx-fetches/passes-props pattern as `streak`
-  // above — Rail is only ever rendered here, so no need for it to re-derive
-  // auth itself. `null` (vs empty array) distinguishes "signed out" from
-  // "signed in but no matches", though Rail treats both as "omit the card".
-  let recommendations: RecommendedArticle[] | null = null;
-  let recentBookmarks: RecommendedArticle[] | null = null;
-  if (user) {
-    [recommendations, recentBookmarks] = await Promise.all([
-      fetchRecommendations(supabase, user.id),
-      fetchRecentBookmarks(supabase, user.id),
-    ]);
-  }
-
   let bookmarkedIds = new Set<string>();
   let upvotedIds = new Set<string>();
   const upvoteCounts = new Map<string, number>();
@@ -110,7 +110,10 @@ export default async function Home({
   if (articles.length > 0) {
     const articleIds = articles.map((article) => article.id);
 
-    const [{ data: bookmarkRows }, { data: countRows }] = await Promise.all([
+    // Bookmarks/upvotes/upvote-counts are independent — all three run in
+    // one Promise.all (upvotes used to be a separate sequential await after
+    // this batch resolved).
+    const [{ data: bookmarkRows }, { data: countRows }, { data: upvoteRows }] = await Promise.all([
       user
         ? supabase
             .from('bookmarks')
@@ -119,18 +122,17 @@ export default async function Home({
             .in('article_id', articleIds)
         : Promise.resolve({ data: [] as { article_id: string }[] }),
       supabase.from('articles').select('id,upvote_count').in('id', articleIds),
+      user
+        ? supabase
+            .from('upvotes')
+            .select('article_id')
+            .eq('user_id', user.id)
+            .in('article_id', articleIds)
+        : Promise.resolve({ data: [] as { article_id: string }[] }),
     ]);
 
     bookmarkedIds = new Set((bookmarkRows ?? []).map((row) => row.article_id));
-
-    if (user) {
-      const { data: upvoteRows } = await supabase
-        .from('upvotes')
-        .select('article_id')
-        .eq('user_id', user.id)
-        .in('article_id', articleIds);
-      upvotedIds = new Set((upvoteRows ?? []).map((row) => row.article_id));
-    }
+    upvotedIds = new Set((upvoteRows ?? []).map((row) => row.article_id));
 
     for (const row of (countRows ?? []) as { id: string; upvote_count: number }[]) {
       upvoteCounts.set(row.id, row.upvote_count);
@@ -142,7 +144,7 @@ export default async function Home({
       <div className="min-w-0 flex-1">
         <div className="mb-[18px] flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-display text-[23px] font-bold tracking-[-0.02em] text-text">
-            Good morning 👋
+            {firstName ? `Good morning, ${firstName} 👋` : 'Good morning 👋'}
           </h1>
 
           <div className="flex gap-1 rounded-xl border border-border bg-card p-1">

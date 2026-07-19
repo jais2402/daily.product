@@ -28,3 +28,15 @@ export function generateIdentity(seed?: string): {
 export function avatarUrl(seed: string): string {
   return `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(seed)}`;
 }
+
+/**
+ * First whitespace-delimited token of a display name, e.g. "Jaya Kumar" ->
+ * "Jaya". Used for the feed's personalized greeting (design-handoff.md §5
+ * "Good morning, Jaya 👋") — `null` for an empty/whitespace-only name so
+ * callers can fall back to the plain greeting.
+ */
+export function firstWord(name: string): string | null {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+  return trimmed.split(/\s+/)[0];
+}

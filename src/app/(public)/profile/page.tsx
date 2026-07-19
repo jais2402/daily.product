@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { getServerSupabase, getSessionUser } from '@/lib/supabase/cached';
 import { avatarUrl } from '@/lib/identity';
 import { roleLabel, type MemberRole } from '@/lib/roles';
 import { currentStreak, activityGrid, weeklyCounts } from '@/lib/streaks';
@@ -27,10 +27,13 @@ function formatJoined(createdAt: string): string {
 }
 
 export default async function ProfilePage() {
-  const supabase = await createServerSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = await getServerSupabase();
+  // getSessionUser is request-scoped (React `cache()`), shared with
+  // sidebar.tsx/topbar-user.tsx when both render in the same request. This
+  // page's own profile select (needs `created_at`, which the shared
+  // `getOwnProfile` helper doesn't fetch) and its 600-row reads query stay
+  // as page-local fetches below.
+  const user = await getSessionUser();
   if (!user) redirect('/login');
 
   const today = new Date().toISOString().slice(0, 10);

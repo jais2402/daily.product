@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { getServerSupabase, getSessionUser, getOwnProfile } from '@/lib/supabase/cached';
 import { fetchTopicsWithCounts } from '@/lib/feed/queries';
 import { avatarUrl } from '@/lib/identity';
 import { roleLabel, type MemberRole } from '@/lib/roles';
@@ -49,27 +49,25 @@ const NAV_ITEM_BASE =
   'flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14px] transition-colors';
 
 export async function Sidebar() {
-  const supabase = await createServerSupabase();
-  const topics = await fetchTopicsWithCounts(supabase);
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = await getServerSupabase();
+  // getSessionUser/getOwnProfile are request-scoped (React `cache()`) so
+  // this getUser() + profile fetch are shared with topbar-user.tsx and
+  // page.tsx rather than re-querying per component.
+  const [topics, user, profile] = await Promise.all([
+    fetchTopicsWithCounts(supabase),
+    getSessionUser(),
+    getOwnProfile(),
+  ]);
 
   let displayName: string | null = null;
   let avatarSeed: string | null = null;
   let role: MemberRole | null = null;
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('display_name,avatar_seed,role')
-      .eq('id', user.id)
-      .single();
     // Profile may exist (auto-created by trigger) but be un-onboarded —
     // fall back to the email prefix and skip the avatar seed entirely.
     displayName = profile?.display_name || user.email?.split('@')[0] || 'You';
     avatarSeed = profile?.avatar_seed || null;
-    role = (profile?.role as MemberRole | null) ?? null;
+    role = profile?.role ?? null;
   }
 
   return (
