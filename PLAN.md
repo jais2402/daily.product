@@ -15,13 +15,15 @@ No component is "done" until it has passed all five gates:
 
 Legend: `[ ]` pending · `[~]` in progress · `[x]` all five gates passed
 
+**LAUNCHED 2026-07-06** — production live on Vercel (PR #1 merged to main).
+
 ## Phase 1 — Foundation (no auth UI)
 
 Plan: docs/superpowers/plans/2026-07-04-phase-1-foundation.md (tasks 7–9 deferred to Phase 4)
 `[~]` below = gates 1–4 passed (built/tested/reviewed/fixed); deploy gate pending Task 8.
 
-- [~] Next.js scaffold + tooling (TS, Tailwind, Vitest, ESLint)
-- [~] Supabase clients module (browser / server / service-role)
+- [x] Next.js scaffold + tooling (TS, Tailwind, Vitest, ESLint)
+- [x] Supabase clients module (browser / server / service-role)
 - [ ] Migration 001: profiles, topics, profile_topics, auth trigger, RLS (blocked: MCP auth)
 - [ ] Migration 002: sources, source_suggestions, articles, article_topics, RLS (blocked: MCP auth)
 - [ ] Migration 003: bookmarks, upvotes (+count trigger), reads, RLS (blocked: MCP auth)
@@ -33,14 +35,14 @@ Plan: docs/superpowers/plans/2026-07-04-phase-1-foundation.md (tasks 7–9 defer
 Plan: docs/superpowers/plans/2026-07-04-phase-2-ingest-admin.md
 Final whole-branch review passed 2026-07-04 (fixes applied in 53e28bc). Branch merge-ready.
 
-- [~] URL canonicalization + dedupe lib
-- [~] RSS fetch/parse module (per-source isolation, failure tracking)
-- [~] Ingest orchestrator (failure isolation, auto-pause at 5)
-- [~] `/api/ingest` cron route (CRON_SECRET)
-- [~] Temporary admin gate via ADMIN_SECRET (Next 16 proxy convention; swapped for is_admin in Phase 4)
-- [~] Approval queue UI (approve+tag / reject)
-- [~] Sources CRUD + health indicators
-- [~] Seed script (list awaiting Jayasuriya's confirmation; run blocked on keys)
+- [x] URL canonicalization + dedupe lib
+- [x] RSS fetch/parse module (per-source isolation, failure tracking)
+- [x] Ingest orchestrator (failure isolation, auto-pause at 5)
+- [x] `/api/ingest` cron route (CRON_SECRET)
+- [x] Temporary admin gate via ADMIN_SECRET (Next 16 proxy convention; swapped for is_admin in Phase 4)
+- [x] Approval queue UI (approve+tag / reject)
+- [x] Sources CRUD + health indicators
+- [x] Seed script (list awaiting Jayasuriya's confirmation; run blocked on keys)
 - [ ] Vercel cron configured + deployed (blocked: user-assisted)
 - Deploy-time schema confirmations: articles.status default 'pending'; sources.status default 'active'
 
@@ -48,20 +50,20 @@ Final whole-branch review passed 2026-07-04 (fixes applied in 53e28bc). Branch m
 
 Plan: docs/superpowers/plans/2026-07-04-phase-3-public-feed.md
 
-- [~] Feed query builders (New Trends now; others post-auth)
-- [~] Article card + grid (responsive, placeholder images)
-- [~] Topic filtering (chips)
-- [~] Article detail view + Read More CTA
+- [x] Feed query builders (New Trends now; others post-auth)
+- [x] Article card + grid (responsive, placeholder images)
+- [x] Topic filtering (chips)
+- [x] Article detail view + Read More CTA
 - [ ] Deployed — at this point the product is publicly usable read-only (blocked: Vercel project)
 
 ## Design pass — hifi handoff applied to public surface (2026-07-06)
 
 Plan: docs/superpowers/plans/2026-07-06-design-pass-public-surface.md · Spec: docs/design/design-handoff.md
 
-- [~] Design tokens + fonts (dark-only, Space Grotesk / IBM Plex Sans)
-- [~] App shell (248px sidebar, topbar, Soon-tagged future nav)
-- [~] Feed restyle (cards, segmented tabs, 296px rail)
-- [~] Article reader restyle (TL;DR, share, related)
+- [x] Design tokens + fonts (dark-only, Space Grotesk / IBM Plex Sans)
+- [x] App shell (248px sidebar, topbar, Soon-tagged future nav)
+- [x] Feed restyle (cards, segmented tabs, 296px rail)
+- [x] Article reader restyle (TL;DR, share, related)
 - [ ] Migration 005 applied (sources public read) — pending user
 - Later phases (4-7) build their screens to this same handoff spec.
 
@@ -69,10 +71,10 @@ Plan: docs/superpowers/plans/2026-07-06-design-pass-public-surface.md · Spec: d
 
 Plan: docs/superpowers/plans/2026-07-06-phase-4-auth-onboarding.md
 
-- [~] Identity generator (name + avatar seed) lib
-- [~] Google OAuth sign-in + session proxy + designed login (screen §1)
-- [~] Onboarding flow — designed role cards + topic chips (screens §2–3)
-- [~] Auth-aware chrome (sidebar user cell, topbar) + is_admin gate (legacy cookie fallback)
+- [x] Identity generator (name + avatar seed) lib
+- [x] Google OAuth sign-in + session proxy + designed login (screen §1)
+- [x] Onboarding flow — designed role cards + topic chips (screens §2–3)
+- [x] Auth-aware chrome (sidebar user cell, topbar) + is_admin gate (legacy cookie fallback)
 - [ ] Live OAuth loop verified (needs Google provider enabled in Supabase)
 - [ ] grant:admin run for Jayasuriya's account
 - [ ] Deployed
@@ -81,29 +83,29 @@ Plan: docs/superpowers/plans/2026-07-06-phase-4-auth-onboarding.md
 
 Plan: docs/superpowers/plans/2026-07-06-phase-5-interactions.md
 
-- [~] Bookmarks (toggle + §7 page + live nav)
-- [~] Upvotes (optimistic toggle + cached count)
-- [~] Read logging on CTA
-- [~] New / Hot / Most Read / Top tabs (design semantics; ranked pagination disjoint across pages)
+- [x] Bookmarks (toggle + §7 page + live nav)
+- [x] Upvotes (optimistic toggle + cached count)
+- [x] Read logging on CTA
+- [x] New / Hot / Most Read / Top tabs (design semantics; ranked pagination disjoint across pages)
 - [ ] Deployed
 
 ## Phase 6 — Streaks + Profile
 
 Plan: docs/superpowers/plans/2026-07-06-phase-6-streaks-profile.md
 
-- [~] Streak + activity math lib (UTC-pure, TDD)
-- [~] Profile page (§8: header, stats, 17×7 grid, weekly chart, editing)
-- [~] Streak chrome (topbar flame pill, rail card) + Profile nav
-- [~] Share-streak
+- [x] Streak + activity math lib (UTC-pure, TDD)
+- [x] Profile page (§8: header, stats, 17×7 grid, weekly chart, editing)
+- [x] Streak chrome (topbar flame pill, rail card) + Profile nav
+- [x] Share-streak
 - [ ] Deployed
 
 ## Phase 7 — Squads
 
 Plan: docs/superpowers/plans/2026-07-06-phase-7-squads.md
 
-- [~] Squad libs (invite codes, slugs, article refs) + actions (create/join/share/leave, RLS choreography)
-- [~] Squads UI (§9: list, detail with shares+members, invite links, join confirm)
-- [~] Sidebar Squads nav live
+- [x] Squad libs (invite codes, slugs, article refs) + actions (create/join/share/leave, RLS choreography)
+- [x] Squads UI (§9: list, detail with shares+members, invite links, join confirm)
+- [x] Sidebar Squads nav live
 - [ ] Deployed
 
 ## Phase 8 — Recommendations + Launch polish
@@ -111,10 +113,10 @@ Plan: docs/superpowers/plans/2026-07-06-phase-7-squads.md
 Plan: docs/superpowers/plans/2026-07-06-phase-8-recs-polish.md
 Final whole-branch review 2 passed (fix applied in de63a5f: admin-action auth guards).
 
-- [~] Recommendations rail (topics + recency + upvotes, read/bookmark exclusion)
-- [~] Recent bookmarks widget + join/leave error surfacing
-- [~] Accessibility pass (aria labels, focus-visible)
-- [~] Playwright smoke suite (3 critical paths, green incl. full auth loop)
+- [x] Recommendations rail (topics + recency + upvotes, read/bookmark exclusion)
+- [x] Recent bookmarks widget + join/leave error surfacing
+- [x] Accessibility pass (aria labels, focus-visible)
+- [x] Playwright smoke suite (3 critical paths, green incl. full auth loop)
 - Note: user-facing "Add Source" suggestions deferred post-launch (admin add works)
 - [ ] Production deploy + cron live (user-assisted)
 

@@ -2,6 +2,14 @@
 
 Architecture decisions and session log. Newest entries first.
 
+## 2026-07-06 — LAUNCHED 🚀
+
+PR #1 merged to main by Jayasuriya; Vercel production deploy live (initial
+failure = env vars missing pre-deploy, fixed by adding + redeploy). Migration
+005 confirmed applied. Deploy gate passed for all phases. Post-launch items:
+verify DEV_LOGIN absent from prod env, enable Google provider + prod redirect
+URLs, grant:admin, daily 3AM UTC cron verification, signed-in click-through.
+
 ## 2026-07-06 — Phases 5-8 complete: ALL code phases done, launch-ready
 
 Autonomous run per Jayasuriya's "complete all the phases": Phase 5 interactions
