@@ -20,15 +20,12 @@ Legend: `[ ]` pending · `[~]` in progress · `[x]` all five gates passed
 ## Phase 1 — Foundation (no auth UI)
 
 Plan: docs/superpowers/plans/2026-07-04-phase-1-foundation.md (tasks 7–9 deferred to Phase 4)
-`[~]` below = gates 1–4 passed (built/tested/reviewed/fixed); deploy gate pending Task 8.
+All gates passed.
 
 - [x] Next.js scaffold + tooling (TS, Tailwind, Vitest, ESLint)
 - [x] Supabase clients module (browser / server / service-role)
-- [ ] Migration 001: profiles, topics, profile_topics, auth trigger, RLS (blocked: MCP auth)
-- [ ] Migration 002: sources, source_suggestions, articles, article_topics, RLS (blocked: MCP auth)
-- [ ] Migration 003: bookmarks, upvotes (+count trigger), reads, RLS (blocked: MCP auth)
-- [ ] Migration 004: squads, squad_members, squad_shares, RLS (blocked: MCP auth)
-- [ ] Vercel deploy skeleton + live smoke check (blocked: Vercel project)
+- [x] Migrations 001–004 applied (2026-07-04)
+- [x] Vercel deploy live (2026-07-06)
 
 ## Phase 2 — Ingest + Admin (core engine)
 
@@ -43,8 +40,8 @@ Final whole-branch review passed 2026-07-04 (fixes applied in 53e28bc). Branch m
 - [x] Approval queue UI (approve+tag / reject)
 - [x] Sources CRUD + health indicators
 - [x] Seed script (list awaiting Jayasuriya's confirmation; run blocked on keys)
-- [ ] Vercel cron configured + deployed (blocked: user-assisted)
-- Deploy-time schema confirmations: articles.status default 'pending'; sources.status default 'active'
+- [x] Vercel cron configured + deployed (vercel.json; verify first 3AM UTC run)
+- [x] Deploy-time schema confirmations: status defaults verified in live DB
 
 ## Phase 3 — Public feed (core product)
 
@@ -54,7 +51,7 @@ Plan: docs/superpowers/plans/2026-07-04-phase-3-public-feed.md
 - [x] Article card + grid (responsive, placeholder images)
 - [x] Topic filtering (chips)
 - [x] Article detail view + Read More CTA
-- [ ] Deployed — at this point the product is publicly usable read-only (blocked: Vercel project)
+- [x] Deployed
 
 ## Design pass — hifi handoff applied to public surface (2026-07-06)
 
@@ -64,7 +61,7 @@ Plan: docs/superpowers/plans/2026-07-06-design-pass-public-surface.md · Spec: d
 - [x] App shell (248px sidebar, topbar, Soon-tagged future nav)
 - [x] Feed restyle (cards, segmented tabs, 296px rail)
 - [x] Article reader restyle (TL;DR, share, related)
-- [ ] Migration 005 applied (sources public read) — pending user
+- [x] Migration 005 applied (verified)
 - Later phases (4-7) build their screens to this same handoff spec.
 
 ## Phase 4 — Auth + onboarding (deferred signup)
@@ -77,7 +74,7 @@ Plan: docs/superpowers/plans/2026-07-06-phase-4-auth-onboarding.md
 - [x] Auth-aware chrome (sidebar user cell, topbar) + is_admin gate (legacy cookie fallback)
 - [ ] Live OAuth loop verified (needs Google provider enabled in Supabase)
 - [ ] grant:admin run for Jayasuriya's account
-- [ ] Deployed
+- [x] Deployed
 
 ## Phase 5 — Interactions + full feed tabs
 
@@ -87,7 +84,7 @@ Plan: docs/superpowers/plans/2026-07-06-phase-5-interactions.md
 - [x] Upvotes (optimistic toggle + cached count)
 - [x] Read logging on CTA
 - [x] New / Hot / Most Read / Top tabs (design semantics; ranked pagination disjoint across pages)
-- [ ] Deployed
+- [x] Deployed
 
 ## Phase 6 — Streaks + Profile
 
@@ -97,7 +94,7 @@ Plan: docs/superpowers/plans/2026-07-06-phase-6-streaks-profile.md
 - [x] Profile page (§8: header, stats, 17×7 grid, weekly chart, editing)
 - [x] Streak chrome (topbar flame pill, rail card) + Profile nav
 - [x] Share-streak
-- [ ] Deployed
+- [x] Deployed
 
 ## Phase 7 — Squads
 
@@ -106,7 +103,7 @@ Plan: docs/superpowers/plans/2026-07-06-phase-7-squads.md
 - [x] Squad libs (invite codes, slugs, article refs) + actions (create/join/share/leave, RLS choreography)
 - [x] Squads UI (§9: list, detail with shares+members, invite links, join confirm)
 - [x] Sidebar Squads nav live
-- [ ] Deployed
+- [x] Deployed
 
 ## Phase 8 — Recommendations + Launch polish
 
@@ -118,13 +115,13 @@ Final whole-branch review 2 passed (fix applied in de63a5f: admin-action auth gu
 - [x] Accessibility pass (aria labels, focus-visible)
 - [x] Playwright smoke suite (3 critical paths, green incl. full auth loop)
 - Note: user-facing "Add Source" suggestions deferred post-launch (admin add works)
-- [ ] Production deploy + cron live (user-assisted)
+- [x] Production deploy live (cron: verify first 3AM UTC run)
 
 ## Launch checklist (user-side)
 
 1. ~~Apply migration 005~~ ✓ done (verified)
-2. Vercel: import repo, env vars (URL/anon/service-role/ADMIN_SECRET/CRON_SECRET) — **DEV_LOGIN must remain UNSET in production**
-3. Merge PR #1
+2. ~~Vercel: import repo, env vars~~ ✓ done — **verify DEV_LOGIN is UNSET in prod env vars**
+3. ~~Merge PR #1~~ ✓ done
 4. Enable Google provider in Supabase + add production URL to Auth redirect list
 5. First deploy → live smoke: feed renders, /admin gate, curl ingest with CRON_SECRET
 6. `npm run grant:admin -- <your-google-email>` after first sign-in
@@ -137,5 +134,7 @@ Final whole-branch review 2 passed (fix applied in de63a5f: admin-action auth gu
 - [x] `.env.local` keys (all 5 set + verified)
 - [x] Source list confirmed (30 feeds; 2 paused — RSS discontinued upstream)
 - [x] Migration 005 applied (verified 2026-07-06: anon reads source names, feed renders them)
-- [ ] Vercel project + domain decision (then merge PR #1 and deploy)
-- [ ] Google OAuth provider (not needed until Phase 4)
+- [x] Vercel project live; PR #1 merged (2026-07-06)
+- [ ] Google OAuth provider enable + prod redirect URLs
+- [ ] grant:admin after first live sign-in
+- [ ] Verify DEV_LOGIN absent from prod env
