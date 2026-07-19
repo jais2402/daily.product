@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateIdentity, avatarUrl } from './identity';
+import { generateIdentity, avatarUrl, firstWord } from './identity';
 
 describe('generateIdentity', () => {
   it('is deterministic for the same seed', () => {
@@ -19,5 +19,27 @@ describe('avatarUrl', () => {
     expect(avatarUrl('abc')).toBe(
       'https://api.dicebear.com/9.x/thumbs/svg?seed=abc',
     );
+  });
+});
+
+describe('firstWord', () => {
+  it('returns the first token of a multi-word name', () => {
+    expect(firstWord('Jaya Kumar')).toBe('Jaya');
+  });
+
+  it('returns the whole name when it is a single word', () => {
+    expect(firstWord('Jaya')).toBe('Jaya');
+  });
+
+  it('collapses extra internal whitespace', () => {
+    expect(firstWord('  Jaya   Kumar  ')).toBe('Jaya');
+  });
+
+  it('returns null for an empty string', () => {
+    expect(firstWord('')).toBeNull();
+  });
+
+  it('returns null for a whitespace-only string', () => {
+    expect(firstWord('   ')).toBeNull();
   });
 });

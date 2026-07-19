@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createServerSupabase } from '@/lib/supabase/server';
+import { getSessionUser, getOwnProfile, getOwnReadDates } from '@/lib/supabase/cached';
 import { avatarUrl } from '@/lib/identity';
 import { currentStreak } from '@/lib/streaks';
 
@@ -19,10 +19,10 @@ function FlameIcon() {
 // "Sign in" link. Separated from layout.tsx so the topbar's own data fetch
 // is scoped here.
 export async function TopbarUser() {
-  const supabase = await createServerSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getSessionUser/getOwnProfile/getOwnReadDates are request-scoped (React
+  // `cache()`) so this getUser() + profile + read-dates fetch are shared
+  // with sidebar.tsx and page.tsx rather than re-querying per component.
+  const user = await getSessionUser();
 
   if (!user) {
     return (
@@ -32,23 +32,13 @@ export async function TopbarUser() {
     );
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('avatar_seed,display_name')
-    .eq('id', user.id)
-    .single();
+  const [profile, readDates] = await Promise.all([getOwnProfile(), getOwnReadDates()]);
 
   const avatarSeed = profile?.avatar_seed || null;
   const displayName = profile?.display_name || user.email?.split('@')[0] || 'You';
 
-  const { data: readRows } = await supabase
-    .from('reads')
-    .select('read_date')
-    .eq('user_id', user.id)
-    .order('read_date', { ascending: false })
-    .limit(60);
   const today = new Date().toISOString().slice(0, 10);
-  const streak = currentStreak((readRows ?? []).map((row) => row.read_date as string), today);
+  const streak = currentStreak(readDates, today);
 
   return (
     <div className="flex items-center gap-3">
