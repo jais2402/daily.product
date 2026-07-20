@@ -60,6 +60,24 @@ test.describe('public feed', () => {
   });
 });
 
+test.describe('search', () => {
+  test('typing a query into the topbar search box and pressing Enter shows results or a no-match message', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    // "the" is data-independent — it'll substring-match many article
+    // titles/summaries regardless of what's currently seeded, so this
+    // doesn't assume specific fixture content either way.
+    const searchInput = page.getByPlaceholder('Search articles…');
+    await searchInput.fill('the');
+    await searchInput.press('Enter');
+
+    await expect(page).toHaveURL(/[?&]q=the\b/);
+    await expect(page.getByText(/Results for|No articles match/).first()).toBeVisible();
+  });
+});
+
 test.describe('auth loop', () => {
   test('dev sign in, onboarding (if needed), bookmarks, sign out', async ({ page }) => {
     await page.goto('/login');
