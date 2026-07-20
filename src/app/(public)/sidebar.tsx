@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { getServerSupabase, getSessionUser, getOwnProfile } from '@/lib/supabase/cached';
 import { fetchTopicsWithCounts } from '@/lib/feed/queries';
 import { avatarUrl } from '@/lib/identity';
 import { roleLabel, type MemberRole } from '@/lib/roles';
 import { SidebarNav } from './sidebar-nav';
+import { SidebarTopics, SidebarTopicsFallback } from './sidebar-topics';
 
 // Lucide-style inline icons (stroke-2, 18px) per design-handoff.md Assets
 // section — no icon package dependency, matching the prototype's approach.
@@ -94,15 +96,9 @@ export async function Sidebar() {
         Topics
       </span>
       <div className="flex flex-wrap gap-[7px] px-2">
-        {topics.map((topic) => (
-          <Link
-            key={topic.id}
-            href={`/?topic=${topic.slug}`}
-            className="rounded-lg border border-border bg-card px-2.5 py-[5px] text-xs text-muted hover:text-text"
-          >
-            {topic.name}
-          </Link>
-        ))}
+        <Suspense fallback={<SidebarTopicsFallback topics={topics} />}>
+          <SidebarTopics topics={topics} />
+        </Suspense>
       </div>
 
       <button
