@@ -25,20 +25,29 @@ const FEED_TABS: { id: FeedTab; label: string }[] = [
   { id: 'top', label: 'Top' },
 ];
 
-/** Build a `/?...` href preserving topic/tab and setting the given overrides. */
+/**
+ * Build a `/?...` href preserving topic/tab/q and setting the given
+ * overrides. `q` composes with topic chips and pagination (search stays
+ * active while the user narrows by topic or pages through results) — it's
+ * only dropped deliberately by the "Clear" link and by submitting a new
+ * search (see search-box.tsx, which drops topic/tab/page instead).
+ */
 function feedHref({
   topicSlug,
   tab,
   page,
+  q,
 }: {
   topicSlug: string | null;
   tab: FeedTab;
   page?: number;
+  q?: string | null;
 }): string {
   const params = new URLSearchParams();
   if (topicSlug) params.set('topic', topicSlug);
   if (tab !== 'new') params.set('tab', tab);
   if (page && page > 1) params.set('page', String(page));
+  if (q) params.set('q', q);
   const qs = params.toString();
   return qs ? `/?${qs}` : '/';
 }
@@ -46,16 +55,16 @@ function feedHref({
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ topic?: string; page?: string; tab?: string }>;
+  searchParams: Promise<{ topic?: string; page?: string; tab?: string; q?: string }>;
 }) {
-  const { topicSlug, page, tab } = parseFeedParams(await searchParams);
+  const { topicSlug, page, tab, q } = parseFeedParams(await searchParams);
   const supabase = await getServerSupabase();
 
   // getSessionUser is request-scoped (React `cache()`) so this getUser()
   // call is shared with sidebar.tsx and topbar-user.tsx rather than
   // re-querying per component.
   const [{ articles, hasMore }, topics, user] = await Promise.all([
-    fetchFeedPage(supabase, { topicSlug, page, tab }),
+    fetchFeedPage(supabase, { topicSlug, page, tab, q }),
     fetchTopicsWithCounts(supabase),
     getSessionUser(),
   ]);
@@ -143,31 +152,46 @@ export default async function Home({
     <main className="mx-auto flex w-full max-w-[1440px] flex-1 gap-[26px] px-7 pb-[60px] pt-[26px]">
       <div className="min-w-0 flex-1">
         <div className="mb-[18px] flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-display text-[23px] font-bold tracking-[-0.02em] text-text">
-            {firstName ? `Good morning, ${firstName} 👋` : 'Good morning 👋'}
-          </h1>
-
-          <div className="flex gap-1 rounded-xl border border-border bg-card p-1">
-            {FEED_TABS.map((feedTab) => (
-              <Link
-                key={feedTab.id}
-                href={feedHref({ topicSlug, tab: feedTab.id })}
-                aria-current={feedTab.id === tab ? 'page' : undefined}
-                className={`rounded-[9px] px-3.5 py-1.5 text-[13px] font-semibold ${
-                  feedTab.id === tab
-                    ? 'bg-acc text-[#0d1016]'
-                    : 'text-muted'
-                }`}
-              >
-                {feedTab.label}
+          {q ? (
+            <div className="flex flex-wrap items-baseline gap-3">
+              <h1 className="font-display text-[23px] font-bold tracking-[-0.02em] text-text">
+                Results for &ldquo;{q}&rdquo;
+              </h1>
+              <Link href="/" className="text-[13.5px] text-muted hover:text-text">
+                Clear ×
               </Link>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <h1 className="font-display text-[23px] font-bold tracking-[-0.02em] text-text">
+              {firstName ? `Good morning, ${firstName} 👋` : 'Good morning 👋'}
+            </h1>
+          )}
+
+          {/* Search is always recency-ordered (see queries.ts SEARCH MODE
+              doc) — the tab pill has no meaning while a query is active. */}
+          {!q && (
+            <div className="flex gap-1 rounded-xl border border-border bg-card p-1">
+              {FEED_TABS.map((feedTab) => (
+                <Link
+                  key={feedTab.id}
+                  href={feedHref({ topicSlug, tab: feedTab.id })}
+                  aria-current={feedTab.id === tab ? 'page' : undefined}
+                  className={`rounded-[9px] px-3.5 py-1.5 text-[13px] font-semibold ${
+                    feedTab.id === tab
+                      ? 'bg-acc text-[#0d1016]'
+                      : 'text-muted'
+                  }`}
+                >
+                  {feedTab.label}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         <nav className="mb-[18px] flex flex-wrap gap-2">
           <Link
-            href={feedHref({ topicSlug: null, tab })}
+            href={feedHref({ topicSlug: null, tab, q })}
             className={`rounded-[10px] px-4 py-[9px] text-[13.5px] font-medium ${
               topicSlug === null
                 ? 'bg-acc text-[#0d1016]'
@@ -179,7 +203,7 @@ export default async function Home({
           {topics.map((topic) => (
             <Link
               key={topic.id}
-              href={feedHref({ topicSlug: topic.slug, tab })}
+              href={feedHref({ topicSlug: topic.slug, tab, q })}
               className={`rounded-[10px] px-4 py-[9px] text-[13.5px] font-medium ${
                 topicSlug === topic.slug
                   ? 'bg-acc text-[#0d1016]'
@@ -192,9 +216,18 @@ export default async function Home({
         </nav>
 
         {articles.length === 0 ? (
-          <p className="py-12 text-center text-muted">
-            Nothing here yet — check back tomorrow
-          </p>
+          <div className="py-12 text-center text-muted">
+            {q ? (
+              <>
+                <p>No articles match &ldquo;{q}&rdquo;</p>
+                <Link href="/" className="mt-2 inline-block text-[13.5px] text-muted hover:text-text">
+                  Clear ×
+                </Link>
+              </>
+            ) : (
+              <p>Nothing here yet — check back tomorrow</p>
+            )}
+          </div>
         ) : (
           <div className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
             {articles.map((article) => (
@@ -214,7 +247,7 @@ export default async function Home({
           <div className="flex justify-between pt-6">
             {page > 1 ? (
               <Link
-                href={feedHref({ topicSlug, tab, page: page - 1 })}
+                href={feedHref({ topicSlug, tab, page: page - 1, q })}
                 className="rounded-[10px] border border-border bg-card px-4 py-2 text-[13.5px] text-text hover:border-acc"
               >
                 ← Prev
@@ -224,7 +257,7 @@ export default async function Home({
             )}
             {hasMore ? (
               <Link
-                href={feedHref({ topicSlug, tab, page: page + 1 })}
+                href={feedHref({ topicSlug, tab, page: page + 1, q })}
                 className="rounded-[10px] border border-border bg-card px-4 py-2 text-[13.5px] text-text hover:border-acc"
               >
                 Next →

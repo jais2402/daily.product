@@ -3,13 +3,14 @@ import { parseFeedParams } from './params';
 
 describe('parseFeedParams', () => {
   it('defaults to page 1, no topic, tab new', () => {
-    expect(parseFeedParams({})).toEqual({ topicSlug: null, page: 1, tab: 'new' });
+    expect(parseFeedParams({})).toEqual({ topicSlug: null, page: 1, tab: 'new', q: null });
   });
   it('accepts valid topic slug and page', () => {
     expect(parseFeedParams({ topic: 'ai', page: '3' })).toEqual({
       topicSlug: 'ai',
       page: 3,
       tab: 'new',
+      q: null,
     });
   });
   it('rejects invalid slugs', () => {
@@ -33,5 +34,29 @@ describe('parseFeedParams', () => {
     expect(parseFeedParams({ tab: 'trending' }).tab).toBe('new');
     expect(parseFeedParams({ tab: '' }).tab).toBe('new');
     expect(parseFeedParams({}).tab).toBe('new');
+  });
+
+  describe('q (search)', () => {
+    it('accepts a valid query', () => {
+      expect(parseFeedParams({ q: 'react hooks' }).q).toBe('react hooks');
+    });
+    it('strips injection-unsafe characters (PostgREST .or/.ilike syntax)', () => {
+      expect(parseFeedParams({ q: 'react,()% hooks' }).q).toBe('react hooks');
+    });
+    it('collapses inner whitespace and trims', () => {
+      expect(parseFeedParams({ q: '  react    hooks  ' }).q).toBe('react hooks');
+    });
+    it('caps at 60 characters', () => {
+      const raw = 'a'.repeat(61);
+      const q = parseFeedParams({ q: raw }).q;
+      expect(q).toBe('a'.repeat(60));
+      expect(q?.length).toBe(60);
+    });
+    it('returns null for a single character (below the 2-char floor)', () => {
+      expect(parseFeedParams({ q: 'a' }).q).toBeNull();
+    });
+    it('returns null when q is missing', () => {
+      expect(parseFeedParams({}).q).toBeNull();
+    });
   });
 });

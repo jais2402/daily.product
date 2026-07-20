@@ -41,6 +41,7 @@ export interface FeedPageParams {
   topicSlug: string | null;
   page: number;
   tab?: FeedTab;
+  q?: string | null;
 }
 
 export interface FeedPage {
@@ -147,20 +148,29 @@ async function resolveTopicFilter(
 /**
  * Fetch a single page of approved articles ordered `new` (published_at
  * desc) or `top` (upvote_count desc, published_at desc tiebreak),
- * optionally filtered to a single topic. Fetches PAGE_SIZE + 1 rows to
- * compute `hasMore` without a separate count query.
+ * optionally filtered to a single topic and/or a search query. Fetches
+ * PAGE_SIZE + 1 rows to compute `hasMore` without a separate count query.
+ *
+ * `q`, when set, is expected to already be sanitized by `parseFeedParams`
+ * (trimmed, whitespace-collapsed, restricted to [a-zA-Z0-9 _-]) — safe to
+ * splice directly into a PostgREST `.or()` ilike pattern with no further
+ * escaping.
  */
 async function fetchOrderedPage(
   supabase: SupabaseClient,
-  { topicSlug, page }: { topicSlug: string | null; page: number },
+  { topicSlug, page, q }: { topicSlug: string | null; page: number; q?: string | null },
   order: 'new' | 'top',
 ): Promise<FeedPage> {
   const from = (page - 1) * PAGE_SIZE;
   const to = page * PAGE_SIZE; // inclusive range of PAGE_SIZE + 1 rows
 
   const topicId = await resolveTopicFilter(supabase, topicSlug);
-  const query = baseArticleQuery(supabase, topicId);
+  let query = baseArticleQuery(supabase, topicId);
   if (!query) return { articles: [], hasMore: false };
+
+  if (q) {
+    query = query.or(`title.ilike.*${q}*,summary.ilike.*${q}*`);
+  }
 
   const ordered =
     order === 'top'
@@ -308,11 +318,20 @@ async function fetchTopCandidateIds(
  * - top: upvote_count desc, published_at desc tiebreak.
  * - hot: ranked by upvotes in the last 48h (raw event count).
  * - read: ranked by distinct readers in the last 7 days.
+ *
+ * SEARCH MODE: when `q` is set, tab ranking is ignored entirely — search
+ * results are always recency-ordered (published_at desc), same as `new`,
+ * with an added title/summary ilike filter. The topic filter still
+ * composes with a search query. Documented behavior, not a bug: search is
+ * a distinct mode from tab-based browsing.
  */
 export async function fetchFeedPage(
   supabase: SupabaseClient,
-  { topicSlug, page, tab = 'new' }: FeedPageParams,
+  { topicSlug, page, tab = 'new', q = null }: FeedPageParams,
 ): Promise<FeedPage> {
+  if (q) {
+    return fetchOrderedPage(supabase, { topicSlug, page, q }, 'new');
+  }
   if (tab === 'hot' || tab === 'read') {
     return fetchRankedPage(supabase, { topicSlug, page, tab });
   }
