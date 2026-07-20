@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
 import { Sidebar } from './sidebar';
 import { TopbarUser } from './topbar-user';
 import { SearchBox } from './search-box';
+import { getSessionUser } from '@/lib/supabase/cached';
 
 function SearchIcon() {
   return (
@@ -33,11 +35,20 @@ function SearchBoxFallback() {
 // Public-surface app shell: sidebar + main column with a sticky topbar.
 // Admin pages carry their own header (src/app/admin/layout.tsx) and are
 // outside this route group, so they are unaffected.
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Members-only pivot (owner decision 2026-07-19): signed-out visitors are
+  // sent straight to /login (no teaser). /login, /onboarding, /auth/*, and
+  // /admin all live outside this (public) route group, so this redirect
+  // cannot loop.
+  const user = await getSessionUser();
+  if (!user) {
+    redirect('/login');
+  }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
