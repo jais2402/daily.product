@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -35,8 +35,47 @@ const ADMIN_SECRET = readEnvLocal('ADMIN_SECRET');
 const DEV_EMAIL = 'dev@dailyproduct.local';
 const DEV_PASSWORD = 'DevPass!2402';
 
+/**
+ * Signs in as the dev fixture user, handling the onboarding branch (the dev
+ * user may or may not have completed onboarding depending on prior runs) —
+ * same flow as the "auth loop" spec below. Members-only pivot (owner decision
+ * 2026-07-19): the public feed/article/search routes now require a session
+ * (src/app/(public)/layout.tsx redirects signed-out visitors to /login), so
+ * every spec that exercises those routes must sign in first.
+ */
+async function signIn(page: Page): Promise<void> {
+  await page.goto('/login');
+
+  await page.getByPlaceholder('Email').fill(DEV_EMAIL);
+  await page.getByPlaceholder('Password').fill(DEV_PASSWORD);
+  await page.getByRole('button', { name: 'Sign in with email' }).click();
+
+  // Lands on either / or /onboarding depending on whether the dev user has
+  // completed onboarding in a previous run.
+  await page.waitForURL(/\/(onboarding)?$/, { timeout: 15_000 });
+
+  if (page.url().includes('/onboarding')) {
+    // Step 1: picking a role card advances straight to step 2 (no separate
+    // "Continue" click — see onboarding-form.tsx `pickRole`).
+    await page.getByRole('button', { name: /Product Manager/ }).click();
+
+    // Step 2: topics may already be pre-selected by role defaults — leave
+    // them as-is (tolerate whatever's pre-selected) and submit.
+    await page.getByRole('button', { name: 'Enter Daily.Product' }).click();
+    await page.waitForURL('/', { timeout: 15_000 });
+  }
+}
+
+test.describe('members gate', () => {
+  test('signed-out visit to / redirects to /login', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/login$/);
+  });
+});
+
 test.describe('public feed', () => {
   test('renders articles, filters by topic, opens an article', async ({ page }) => {
+    await signIn(page);
     await page.goto('/');
 
     // At least one article link renders on the home feed.
@@ -64,6 +103,7 @@ test.describe('search', () => {
   test('typing a query into the topbar search box and pressing Enter shows results or a no-match message', async ({
     page,
   }) => {
+    await signIn(page);
     await page.goto('/');
 
     // "the" is data-independent — it'll substring-match many article
@@ -80,26 +120,7 @@ test.describe('search', () => {
 
 test.describe('auth loop', () => {
   test('dev sign in, onboarding (if needed), bookmarks, sign out', async ({ page }) => {
-    await page.goto('/login');
-
-    await page.getByPlaceholder('Email').fill(DEV_EMAIL);
-    await page.getByPlaceholder('Password').fill(DEV_PASSWORD);
-    await page.getByRole('button', { name: 'Sign in with email' }).click();
-
-    // Lands on either / or /onboarding depending on whether the dev user has
-    // completed onboarding in a previous run.
-    await page.waitForURL(/\/(onboarding)?$/, { timeout: 15_000 });
-
-    if (page.url().includes('/onboarding')) {
-      // Step 1: picking a role card advances straight to step 2 (no
-      // separate "Continue" click — see onboarding-form.tsx `pickRole`).
-      await page.getByRole('button', { name: /Product Manager/ }).click();
-
-      // Step 2: topics may already be pre-selected by role defaults — leave
-      // them as-is (tolerate whatever's pre-selected) and submit.
-      await page.getByRole('button', { name: 'Enter Daily.Product' }).click();
-      await page.waitForURL('/', { timeout: 15_000 });
-    }
+    await signIn(page);
 
     // Sidebar user cell: sign-out button present (desktop viewport required
     // — sidebar is `hidden lg:flex`).
@@ -110,11 +131,13 @@ test.describe('auth loop', () => {
     await page.goto('/bookmarks');
     await expect(page.getByRole('heading', { name: 'Bookmarks' })).toBeVisible();
 
-    // Sign out via the sidebar form → back to a signed-out state with a
-    // "Sign in" link.
+    // Sign out via the sidebar form → the members-only gate now redirects
+    // the signed-out session straight from / to /login (no more "Sign in"
+    // link on a viewable public "/").
     await page.goto('/');
     await page.getByRole('button', { name: 'Sign out' }).click();
-    await expect(page.getByRole('link', { name: 'Sign in' }).first()).toBeVisible();
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
   });
 });
 
